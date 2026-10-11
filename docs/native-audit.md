@@ -31,6 +31,8 @@ dev.2 使用附属注册的 SpellAbyssalShard 子类，继承本体完整载荷�
 
 ## 明确来源与获取（dev.2 补核）
 
+dev.4 补充：附属主碎晶及三个半尺寸子碎晶通过 Conflux 0.1.16 的 Allies.areAllies，以原施法者排除友军追踪和碰撞。分裂仍完整调用本体 onBreak，通过仅匹配 SpellAbyssalShard 的工厂钩子传递友军上下文；本体选择数量、随机速度与尺寸，普通原生碎晶仍走原工厂。子碎晶没有 Ars resolver、续接或额外扣费。受控 Ars 载体的碰撞钩子仅对本附属登记的载体生效；命中回调也防御性拒绝友军。本附属不复制友军规则、不硬依赖其他附属、不修改 Core。
+
 补核两版实际发布 JAR 的 AquamiraeItems 注册和 NeoForge DreadwakeTier2Ability 字节码。反编译结果位于忽略的 .upstream/feedback-decompiled/；GitHub 源码只辅助阅读。
 
 | 能力 | 原生来源 | 附属图标和抄写材料 |

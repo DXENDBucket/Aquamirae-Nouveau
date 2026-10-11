@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import sys
 import zipfile
+import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -59,6 +60,17 @@ def check(platform):
                         assert model['textures']['layer0'] == 'aquamirae:item/' + item, 'Icon and acquisition must use the same native source'
             if platform:
                 assert not any('glyph_abyssal_shard.json' in n for n in names), 'Forge exposes unsupported shard'
+                assert not any('/mixin/' in n or n == 'aquamirae_nouveau.mixins.json' for n in names), 'Forge ships Neo-only hooks'
+            elif path == binary:
+                metadata = tomllib.loads(z.read('META-INF/neoforge.mods.toml').decode('utf8'))
+                dependency = next(d for d in metadata['dependencies']['aquamirae_nouveau'] if d['modId'] == 'ars_conflux')
+                assert dependency['versionRange'] == '[0.1.16,0.2)', 'Alliance API requires Core 0.1.16'
+                mixin_file = metadata['mixins'][0]['config']
+                mixins = json.loads(z.read(mixin_file))
+                for hook in mixins['mixins']:
+                    assert mixins['package'].replace('.', '/') + '/' + hook + '.class' in names, 'Missing native/Ars opt-in hook'
+                shard = z.read('dev/aquamiraenouveau/projectile/SpellAbyssalShard.class')
+                assert b'dev/arsconflux/api/targeting/Allies' in shard, 'Missing Core alliance query'
         print(f'PASS {path} SHA-256 {hashlib.sha256(path.read_bytes()).hexdigest()}')
 
 if __name__ == '__main__':

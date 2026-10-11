@@ -9,6 +9,8 @@ import com.hollingsworth.arsnouveau.common.spell.effect.EffectOrbit;
 import com.hollingsworth.arsnouveau.common.spell.method.MethodSelf;
 import com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry;
 import dev.arsconflux.api.context.CastContexts;
+import dev.arsconflux.api.context.CastContext;
+import dev.arsconflux.api.targeting.Allies;
 import dev.arsconflux.api.execution.ExecutionSessions;
 import dev.arsconflux.api.glyph.ArsSpellAccess;
 import dev.arsconflux.api.projectile.*;
@@ -30,7 +32,8 @@ import java.util.*;
 public final class ShardGameTests {
     private static ServerPlayer player(GameTestHelper h) {
         var base = h.absoluteVec(new Vec3(2, 0, 2));
-        var p = FakePlayerFactory.get(h.getLevel(), new com.mojang.authlib.GameProfile(UUID.randomUUID(), "ShardTester"));
+        var uuid = UUID.randomUUID();
+        var p = FakePlayerFactory.get(h.getLevel(), new com.mojang.authlib.GameProfile(uuid, "Shard" + uuid.toString().substring(0, 8)));
         p.setPos(base.x, h.getLevel().getMaxBuildHeight() - 24, base.z);
         p.setYRot(-90); p.setXRot(0); p.setGameMode(GameType.SURVIVAL);
         p.getAttribute(net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE.wrapAsHolder(com.hollingsworth.arsnouveau.api.perk.PerkAttributes.MAX_MANA.get())).setBaseValue(1000);
@@ -172,7 +175,7 @@ public final class ShardGameTests {
                     h.assertTrue(primary.isRemoved(), "Native primary shard breaks");
                     h.assertTrue(marker.hits == 1 && marker.victim == zombie && marker.owner == p, "Ars continuation resolves once with correct victim and owner");
                     h.assertTrue(Math.abs(afterSpawn - CapabilityRegistry.getMana(p).getCurrentMana()) < .001, "Impact and split do not rebill a single-hit payload");
-                    h.assertTrue(h.getLevel().getEntitiesOfClass(AbyssalShard.class, area(p)).stream().filter(e -> e.getOwner() == p && !(e instanceof SpellAbyssalShard)).count() == 3, "Three native children retain original ownership");
+                    h.assertTrue(h.getLevel().getEntitiesOfClass(SpellAbyssalShard.class, area(p)).stream().filter(e -> e.getOwner() == p && !e.isRemoved() && Math.abs(e.getShardScale() - .5) < .001).count() == 3, "Three opt-in native children retain original ownership");
                     h.succeed();
                 } finally { zombie.discard(); cleanup(h, p); }
             });
@@ -258,6 +261,117 @@ public final class ShardGameTests {
             h.assertTrue(primary.isRemoved(), "Owner loss cleans up transient managed payload");
             h.succeed();
         } finally { cleanup(h, p); }
+    }
+    @GameTest(template="empty", batch="aqua_shard", timeoutTicks=40)
+    public static void alliedMonsterIsSkippedDuringHomingAndContact(GameTestHelper h) {
+        var p = player(h); p.setPos(p.position().add(0, -64, 0));
+        var friend = target(h, p, EntityType.ZOMBIE, new Vec3(3, 0, 0));
+        var enemy = target(h, p, EntityType.COW, new Vec3(6, 0, 0));
+        var board = h.getLevel().getScoreboard(); var team = board.addPlayerTeam("aq" + UUID.randomUUID().toString().substring(0, 8));
+        board.addPlayerToTeam(p.getScoreboardName(), team); board.addPlayerToTeam(friend.getScoreboardName(), team);
+        var marker = new Marker(); aimAt(p, enemy);
+        try {
+            h.assertTrue(Allies.areAllies(p, friend) && !Allies.areAllies(p, enemy), "Core recognizes team ally but keeps a neutral cow hittable");
+            var r = resolver(h, p, new Spell(MethodProjectile.INSTANCE, glyph(), marker));
+            h.assertTrue(r.onCast(ItemStack.EMPTY, h.getLevel()), "Real shard casts through allied hostile monster");
+            shard(h, p).tickCount = 30;
+            h.runAfterDelay(12, () -> {
+                try {
+                    h.assertTrue(friend.getHealth() == 100 && !friend.hasEffect(MobEffects.WEAKNESS), "Allied monster receives no native damage or weakness");
+                    h.assertTrue(enemy.getHealth() < 100 && marker.hits == 1 && marker.victim == enemy, "Homing and collision skip friend and continue on the target behind it");
+                    h.succeed();
+                } finally { board.removePlayerTeam(team); friend.discard(); enemy.discard(); cleanup(h, p); }
+            });
+        } catch (RuntimeException error) { board.removePlayerTeam(team); friend.discard(); enemy.discard(); cleanup(h, p); throw error; }
+    }
+    @GameTest(template="empty", batch="aqua_shard", timeoutTicks=40)
+    public static void originalCasterPetIsProtectedWhenDamageOwnerDiffers(GameTestHelper h) {
+        var p = player(h); var damageOwner = player(h);
+        p.setPos(p.position().add(0, -104, 0)); damageOwner.setPos(p.position());
+        var pet = target(h, p, EntityType.WOLF, new Vec3(3, 0, 0)); pet.setOwnerUUID(p.getUUID());
+        var enemy = target(h, p, EntityType.COW, new Vec3(6, 0, 0)); var marker = new Marker(); aimAt(p, enemy);
+        try {
+            h.assertTrue(Allies.areAllies(p, pet) && !Allies.areAllies(damageOwner, pet), "Core sees the original caster's ownership through UUID");
+            var r = resolver(h, p, new Spell(MethodProjectile.INSTANCE, glyph(), marker));
+            CastContexts.bind(r.spellContext, CastContext.of(r.spellContext, null, null).withDamageOwner(damageOwner));
+            h.assertTrue(r.onCast(ItemStack.EMPTY, h.getLevel()), "Remote ownership shard casts");
+            h.assertTrue(shard(h, damageOwner).getOwner() == damageOwner, "Damage owner remains independent of alliance source");
+            h.runAfterDelay(12, () -> {
+                try {
+                    h.assertTrue(pet.getHealth() == 100 && !pet.hasEffect(MobEffects.WEAKNESS), "Pet is passed through without payload");
+                    h.assertTrue(marker.hits == 1 && marker.victim == enemy && marker.owner == damageOwner, "Enemy behind pet receives original damage ownership continuation");
+                    h.succeed();
+                } finally { pet.discard(); enemy.discard(); cleanup(h, p); cleanup(h, damageOwner); }
+            });
+        } catch (RuntimeException error) { pet.discard(); enemy.discard(); cleanup(h, p); cleanup(h, damageOwner); throw error; }
+    }
+    @GameTest(template="empty", batch="aqua_shard", timeoutTicks=40)
+    public static void splitFragmentsUseCoreProviderAndRetainNativePayload(GameTestHelper h) throws Exception {
+        var p = player(h); var marker = new Marker();
+        p.setPos(p.position().add(0, -144, 0));
+        var friend = target(h, p, EntityType.ZOMBIE, new Vec3(4, 0, 0));
+        var enemy = target(h, p, EntityType.COW, new Vec3(7, 0, 0));
+        var registration = Allies.register(CarrierRegistry.id("aquamirae_nouveau:test_" + p.getUUID()),
+                (a, b) -> a == p && b == friend);
+        try {
+            var r = resolver(h, p, new Spell(MethodProjectile.INSTANCE, glyph(), marker));
+            h.assertTrue(r.onCast(ItemStack.EMPTY, h.getLevel()), "Parent casts");
+            var primary = shard(h, p); primary.tickCount = 201; primary.tick();
+            var fragments = h.getLevel().getEntitiesOfClass(SpellAbyssalShard.class, area(p)).stream().filter(e -> e.getOwner() == p && !e.isRemoved()).toList();
+            h.assertTrue(fragments.size() == 3 && fragments.stream().allMatch(e -> e.getShardScale() == .5f), "Native break creates three half-scale opted-in children");
+            var moving = fragments.get(0); fragments.stream().skip(1).forEach(Entity::discard);
+            moving.setPos(p.getEyePosition()); moving.setDeltaMovement(enemy.getBoundingBox().getCenter().subtract(moving.position()).normalize().scale(.8));
+            moving.tickCount = 30;
+            h.runAfterDelay(14, () -> {
+                try {
+                    h.assertTrue(friend.getHealth() == 100 && !friend.hasEffect(MobEffects.WEAKNESS), "External provider protects an allied monster from child tracking and contact");
+                    h.assertTrue(enemy.getHealth() == 95 && enemy.hasEffect(MobEffects.WEAKNESS) && moving.isRemoved(), "Child retains five native damage and weakness on neutral target");
+                    h.assertTrue(marker.hits == 0, "Split children do not continue Ars effects");
+                    var nativeShard = AbyssalShard.create(h.getLevel(), p, p.getEyePosition(), Vec3.ZERO);
+                    nativeShard.onBreak(); nativeShard.discard();
+                    h.assertTrue(h.getLevel().getEntitiesOfClass(AbyssalShard.class, area(p)).stream().filter(e -> e.getOwner() == p && e.getClass() == AbyssalShard.class).count() == 3, "Ordinary Aquamirae splitting remains unmodified");
+                    h.succeed();
+                } finally { close(registration); friend.discard(); enemy.discard(); cleanup(h, p); }
+            });
+        } catch (Exception error) { close(registration); friend.discard(); enemy.discard(); cleanup(h, p); throw error; }
+    }
+    @GameTest(template="empty", batch="aqua_shard", timeoutTicks=40)
+    public static void managedCarrierSkipsAlliesWithoutBillingOrContinuation(GameTestHelper h) throws Exception {
+        var p = player(h); p.setPos(p.position().add(0, -184, 0));
+        var marker = new Marker(); var friend = target(h, p, EntityType.ZOMBIE, new Vec3(3, 0, 0));
+        var enemy = target(h, p, EntityType.COW, new Vec3(6, 0, 0));
+        var registration = Allies.register(CarrierRegistry.id("aquamirae_nouveau:test_" + p.getUUID()), (a, b) -> a == p && b == friend);
+        try {
+            var r = resolver(h, p, new Spell(MethodProjectile.INSTANCE, glyph(), marker)); r.castType = MethodProjectile.INSTANCE;
+            var carrier = new EntityProjectileSpell(h.getLevel(), r); carrier.setOwner(p); carrier.setPos(p.getEyePosition());
+            carrier.setDeltaMovement(enemy.getBoundingBox().getCenter().subtract(carrier.position()).normalize().scale(.8));
+            var repeated = new CarrierProfile(CarrierRegistry.id("aquamirae_nouveau:test_allied_carrier"), true, true, null, Set::of);
+            h.assertTrue(glyph().replace(carrier, repeated), "Managed carrier opts in");
+            double mana = CapabilityRegistry.getMana(p).getCurrentMana();
+            // Defensive callback guard also covers adapters dispatching hits without the carrier predicate.
+            ArsSpellAccess.resolver(carrier).onResolveEffect(h.getLevel(), new EntityHitResult(friend));
+            h.assertTrue(CapabilityRegistry.getMana(p).getCurrentMana() == mana && marker.hits == 0 && friend.getHealth() == 100,
+                    "Allied callback causes no fee, native damage or continuation");
+            h.runAfterDelay(12, () -> {
+                try {
+                    h.assertTrue(friend.getHealth() == 100 && !friend.hasEffect(MobEffects.WEAKNESS), "Real Ars collision bypasses friend");
+                    h.assertTrue(marker.hits == 1 && marker.victim == enemy && CapabilityRegistry.getMana(p).getCurrentMana() == mana - 80,
+                            "Carrier reaches target behind friend and bills exactly one impact");
+                    h.succeed();
+                } finally { close(registration); friend.discard(); enemy.discard(); cleanup(h, p); }
+            });
+        } catch (Exception error) { close(registration); friend.discard(); enemy.discard(); cleanup(h, p); throw error; }
+    }
+    private static <T extends net.minecraft.world.entity.Mob> T target(GameTestHelper h, ServerPlayer p, EntityType<T> type, Vec3 offset) {
+        var target = type.create(h.getLevel()); target.setNoAi(true); target.setNoGravity(true); target.setPos(p.position().add(offset));
+        // Daylight damage and other simultaneously running homing scenes must not contaminate ally assertions.
+        if (target instanceof net.minecraft.world.entity.monster.Zombie)
+            target.setItemSlot(EquipmentSlot.HEAD, new ItemStack(net.minecraft.world.item.Items.LEATHER_HELMET));
+        target.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100); target.setHealth(100); h.getLevel().addFreshEntity(target);
+        return target;
+    }
+    private static void close(AutoCloseable registration) {
+        try { registration.close(); } catch (Exception error) { throw new RuntimeException(error); }
     }
     private static final class Marker extends AbstractEffect {
         int hits; LivingEntity victim, owner;

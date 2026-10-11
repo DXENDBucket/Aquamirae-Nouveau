@@ -2,14 +2,14 @@
 
 独立的海灵物语与 Ars Nouveau 联动附属，使用 Ars Conflux 中立 API。
 显示名称：**Aquamirae & Nouveau**；Mod ID：`aquamirae_nouveau`；作者 EndXiom；附属代码许可 MIT。
-当前版本 **0.1.0-dev.3**。原模组由 Obscuria 开发；本项目不代表其官方，也不打包原模组代码或素材。
+当前版本 **0.1.0-dev.4**。原模组由 Obscuria 开发；本项目不代表其官方，也不打包原模组代码或素材。
 
 | 平台 | Java | 原模组验证基线 | Ars 验证基线 |
 | --- | --- | --- | --- |
 | NeoForge 1.21.1 / 21.1.250 | 21 | Aquamirae 7.2.11 / Fragmentum 5.2.0 | 5.13.3 |
 | Forge 1.20.1 / 47.4.0 | 17 | Aquamirae 7.1.14 / Fragmentum 5.2.0 | 4.12.7 |
 
-需要独立安装 Ars Nouveau、Ars Conflux 0.1.15、Aquamirae 及其前置。
+需要独立安装 Ars Nouveau、Aquamirae 及其前置。NeoForge 需要 Ars Conflux 0.1.16 的友军 API；Forge 四个状态魔符仍兼容 Conflux 0.1.15。
 其他法术附属不是必需依赖。两平台共用 `common/` 源码和 `VERSION`。
 
 | 魔符 | 平台 | 默认触发耗蓝 | 默认冷却 | 行为 |
@@ -33,9 +33,10 @@
 
 深渊碎晶通过 Conflux ProjectileForm 消耗原 Ars 弹射物生成，场上只有替换后的碎晶。主碎晶可直接碰撞普通生物；16 格追踪针对敌对生物和正在攻击所有者的生物，包含不继承 Monster 的史莱姆、岩浆怪。继续使用本体追踪运动、液体阻力、虚弱、分裂和 200 tick 生命周期。继承本体碎晶类并引用本体渲染器，不修改普通原生实体。
 增强将原生尺寸每次加 0.2，尺寸上限 2，相应提高原生伤害，并改变其原生追踪建立速度；子碎晶仍固定尺寸 0.5。
-主碎晶命中实体或方块时续接后续 Ars 魔符，保留目标、所有者、付款者与入射方向。原生分裂生成的三个子碎晶只保留本体伤害和虚弱，不续接 Ars 魔符、不再次扣费。
+主碎晶命中实体或方块时续接后续 Ars 魔符，保留目标、所有者、付款者与入射方向。分裂生成的三个子碎晶只保留本体伤害和虚弱，不续接 Ars 魔符、不再次扣费。
+主碎晶、子碎晶和受控 Ars 载体均通过 Conflux `Allies.areAllies` 排除原施法者的友军，不锁定、不碰撞、不施加伤害或后续效果；受控重复形态也不因友军扣费。支持队伍、所有权及 Core 扩展提供者，中立生物仍可被直接命中。仅本附属产生的碎晶与载体启用筛选，普通海灵碎晶与普通 Ars 法术保持原样。
 环绕及其他 Core 已登记的受控形态通过 ArsTrajectory 保留原轨迹和碰撞；替换实体停止原生移动/碰撞，客户端同步控制模式，避免两个驱动器。重复命中形态每次命中支付载荷费，保持完整、不分裂；单次命中形态在生成时支付一次。
-Core ExecutionSession 负责所有者失效、空蓝、区块未加载、到期和取消清理。载荷不跨存档保存续接；失去运行时控制器的重新载入实体会移除。分裂子碎晶遵循本体生命周期。
+Core ExecutionSession 负责所有者失效、空蓝、区块未加载、到期和取消清理。载荷不跨存档保存续接；失去运行时控制器或友军上下文的重新载入实体会移除。分裂子碎晶遵循本体生命周期，原施法者失效也会移除。
 Forge 7.1.14 没有该实体，因此不注册深渊碎晶、配置或获取配方。
 
 例如：`弹射物 → 护甲碎裂 → 伤害`、`自身 → 深海之怒`、`弹射物 → 深渊碎晶 → 护甲碎裂`、`自身 → 环绕 → 深渊碎晶 → 伤害`。旧版 `自身 → 深渊碎晶` 须重新编排。
@@ -60,10 +61,10 @@ Forge 7.1.14 没有该实体，因此不注册深渊碎晶、配置或获取配�
 创造模式默认绕过冷却，可通过 `creativeCooldown` 启用；`cooldowns.enabled` 全局关闭，某个 `cooldowns.seconds` 设为 0 仅关闭该魔符。
 未命中也会记主动释放冷却；是否扣载荷费取决于后续效果是否成功触发。
 
-在自己的工作树及固定 Conflux 检出目录构建；依赖放在忽略的 `libs/`、`forge/libs/`，哈希见各自 `dependencies.lock.json`。
+在自己的工作树及固定 Conflux 检出目录构建；当前为独立 `../Ars-Conflux-allies`，固定提交 `b24f18d72e64a902ff6c966040b0b83ea3cc6226`。依赖放在忽略的 `libs/`、`forge/libs/`，哈希见各自 `dependencies.lock.json`。
 NeoForge 在根目录用 Java 21；Forge 在 `forge/` 用 Java 17，各自运行 `./gradlew.bat :runGameTestServer :jar :sourcesJar --offline --console=plain`。
 Forge `jar` 会执行 `reobfJar`；只使用重混淆后的最终 JAR。两版可用 `-PconfluxCheckout=...` 指定独立 Core。
 根目录 `python tools/verify_release.py` 验证 NeoForge 产物，加 `--forge` 验证 Forge 产物。
 `tools/generate_resources.py` 维护共享的中英文本、NeoForge 配方和贴图引用；Forge 构建转换为 Ars 4 的配方格式。
 
-本体差异和未接入能力见 [原生行为核对](docs/native-audit.md)，当前验证与产物见 [dev.3 交接](docs/handoff-dev3.md)，[dev.2 交接](docs/handoff-dev2.md)和[首批交接](docs/handoff-first-abilities.md)保留历史记录。
+本体差异和未接入能力见 [原生行为核对](docs/native-audit.md)，当前验证与产物见 [dev.4 交接](docs/handoff-dev4.md)，[dev.3 交接](docs/handoff-dev3.md)、[dev.2 交接](docs/handoff-dev2.md)和[首批交接](docs/handoff-first-abilities.md)保留历史记录。

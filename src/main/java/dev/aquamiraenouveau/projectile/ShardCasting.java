@@ -7,6 +7,7 @@ import dev.arsconflux.api.glyph.ArsSpellAccess;
 import dev.arsconflux.api.projectile.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
 public final class ShardCasting {
@@ -20,6 +21,7 @@ public final class ShardCasting {
         var quote = glyph.initialCharge(resolver.spellContext, stats.getAugments());
         var shard = new SpellAbyssalShard(ShardEntities.SHARD.get(), world);
         shard.setOwner(frame.damageOwner());
+        shard.setAllianceCaster(frame.caster());
         shard.setShardScale((float) Math.min(2.0, 1.0 + Math.max(0, stats.getAmpMultiplier()) * 0.2));
         var flight = new Flight(shard, carrier, profile, stats.getAccMultiplier());
         var continuation = resolver.clone();
@@ -49,13 +51,17 @@ public final class ShardCasting {
         @Override public Vec3 incomingDirection() { return direction; }
         @Override public boolean start(ExecutionSession<SpellAbyssalShard> session) {
             shard.configure(carrier, trajectory != null, repeated, hit -> impact(session, hit));
-            if (trajectory != null) return trajectory.start(session.world(), () -> {}, hit -> impact(session, hit));
+            if (trajectory != null) {
+                ShardCarriers.attach(carrier, shard);
+                return trajectory.start(session.world(), () -> {}, hit -> impact(session, hit));
+            }
             shard.setPos(carrier.position());
             shard.setDeltaMovement(direction.scale(0.8 * Math.max(0.1, 1 + acceleration / 0.75)));
             return session.world().hasChunkAt(shard.blockPosition()) && session.world().addFreshEntity(shard);
         }
         private void impact(ExecutionSession<SpellAbyssalShard> session, HitResult hit) {
             if (hit.getType() == HitResult.Type.MISS) return;
+            if (hit instanceof EntityHitResult entity && shard.ignoresAlly(entity.getEntity())) return;
             direction = trajectory == null ? shard.getDeltaMovement().normalize() : trajectory.incomingDirection();
             if (!session.activate(() -> {
                 shard.setPos(hit.getLocation());
@@ -70,6 +76,7 @@ public final class ShardCasting {
         }
         @Override public void close(ExecutionSession<SpellAbyssalShard> session, ExecutionSession.EndReason reason) {
             shard.detach();
+            ShardCarriers.detach(carrier);
             if (trajectory != null) trajectory.close();
             else { shard.discard(); carrier.discard(); }
         }

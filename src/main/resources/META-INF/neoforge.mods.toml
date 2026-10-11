@@ -8,6 +8,9 @@ displayName="Aquamirae & Nouveau"
 authors="EndXiom"
 description="Independent Aquamirae integration for Ars Nouveau via Ars Conflux."
 
+[[mixins]]
+config="aquamirae_nouveau.mixins.json"
+
 [[dependencies.aquamirae_nouveau]]
 modId="minecraft"
 type="required"
@@ -32,7 +35,7 @@ side="BOTH"
 [[dependencies.aquamirae_nouveau]]
 modId="ars_conflux"
 type="required"
-versionRange="[0.1.15,0.2)"
+versionRange="[0.1.16,0.2)"
 ordering="AFTER"
 side="BOTH"
 
