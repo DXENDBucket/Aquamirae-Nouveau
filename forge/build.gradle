@@ -54,16 +54,18 @@ def bridges = layout.buildDirectory.dir('generated/bridges')
 def generateConfig = tasks.register('generateConfig') {
     inputs.file '../src/main/java/dev/aquamiraenouveau/platform/AquamiraeConfig.java'
     inputs.files '../src/main/java/dev/aquamiraenouveau/projectile/SpellTerribleChakram.java',
-            '../src/main/java/dev/aquamiraenouveau/projectile/SpellMazeRose.java', '../src/main/java/dev/aquamiraenouveau/mixin/RoseHomingMixin.java'
+            '../src/main/java/dev/aquamiraenouveau/projectile/SpellMazeRose.java', '../src/main/java/dev/aquamiraenouveau/mixin/RoseHomingMixin.java',
+            '../src/main/java/dev/aquamiraenouveau/platform/NativeShatterBursts.java'
     outputs.dir bridges
     doLast {
         def text = file('../src/main/java/dev/aquamiraenouveau/platform/AquamiraeConfig.java').getText('UTF-8')
                 .replace('net.neoforged.neoforge.common.ModConfigSpec', 'net.minecraftforge.common.ForgeConfigSpec').replace('ModConfigSpec', 'ForgeConfigSpec')
         def out = new File(bridges.get().asFile, 'dev/aquamiraenouveau/platform/AquamiraeConfig.java')
         out.parentFile.mkdirs(); out.setText(text, 'UTF-8')
-        for (relative in ['projectile/SpellTerribleChakram.java', 'projectile/SpellMazeRose.java', 'mixin/RoseHomingMixin.java']) {
+        for (relative in ['projectile/SpellTerribleChakram.java', 'projectile/SpellMazeRose.java', 'mixin/RoseHomingMixin.java', 'platform/NativeShatterBursts.java']) {
             def adapted = file('../src/main/java/dev/aquamiraenouveau/' + relative).getText('UTF-8')
                     .replace('dev.obscuria.aquamirae.common.entity.projectile.', 'dev.obscuria.aquamirae.common.entity.')
+                    .replace('dev.obscuria.aquamirae.integration.DamageContext', 'dev.obscuria.aquamirae.common.hook.DamageContext')
                     .replace('defineSynchedData(SynchedEntityData.Builder builder)', 'defineSynchedData()')
                     .replace('super.defineSynchedData(builder); builder.define(', 'super.defineSynchedData(); entityData.define(')
             def bridge = new File(bridges.get().asFile, 'dev/aquamiraenouveau/' + relative)
@@ -76,16 +78,19 @@ tasks.named('compileJava') { dependsOn generateConfig }
 tasks.named('sourcesJar') { dependsOn generateConfig }
 def testBridges = layout.buildDirectory.dir('generated/test-bridges')
 def generateTests = tasks.register('generateForgeTests') {
-    inputs.files '../src/gameTest/java/dev/aquamiraenouveau/AbilityGameTests.java', '../src/gameTest/java/dev/aquamiraenouveau/ChakramGameTests.java'
+    inputs.files '../src/gameTest/java/dev/aquamiraenouveau/AbilityGameTests.java', '../src/gameTest/java/dev/aquamiraenouveau/ChakramGameTests.java', '../src/gameTest/java/dev/aquamiraenouveau/ShatterBurstGameTests.java'
     outputs.dir testBridges
     doLast {
-      for (name in ['AbilityGameTests.java', 'ChakramGameTests.java']) {
+      for (name in ['AbilityGameTests.java', 'ChakramGameTests.java', 'ShatterBurstGameTests.java']) {
         def text = file('../src/gameTest/java/dev/aquamiraenouveau/' + name).getText('UTF-8')
                 .replace('template="empty"', 'template="empty", templateNamespace="aquamirae_nouveau"')
                 .replace('net.neoforged.neoforge.gametest', 'net.minecraftforge.gametest')
                 .replace('net.neoforged.neoforge.common.util', 'net.minecraftforge.common.util')
                 .replace('CapabilityRegistry.getMana(p)', 'CapabilityRegistry.getMana(p).orElseThrow(IllegalStateException::new)')
+                .replace('CapabilityRegistry.getMana(owner)', 'CapabilityRegistry.getMana(owner).orElseThrow(IllegalStateException::new)')
                 .replace('r.getExpendedCost()', 'r.getResolveCost()')
+                .replace('net.neoforged.neoforge.common.NeoForge', 'net.minecraftforge.common.MinecraftForge')
+                .replace('NeoForge.EVENT_BUS', 'MinecraftForge.EVENT_BUS')
                 .replace('net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE.wrapAsHolder(com.hollingsworth.arsnouveau.api.perk.PerkAttributes.MAX_MANA.get())', 'com.hollingsworth.arsnouveau.api.perk.PerkAttributes.MAX_MANA.get()')
         def out = new File(testBridges.get().asFile, 'dev/aquamiraenouveau/' + name)
         out.parentFile.mkdirs(); out.setText(text, 'UTF-8')

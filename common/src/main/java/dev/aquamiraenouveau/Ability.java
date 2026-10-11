@@ -8,7 +8,9 @@ public enum Ability {
     ABYSSAL_SHARD("abyssal_shard", "Abyssal Shard", 80, 0, 1, false, 2),
     SCYPHOID_STING("scyphoid_sting", "Scyphoid Sting", 40, 60, 5, false, 3),
     TERRIBLE_CHAKRAM("terrible_chakram", "Terrible Chakram", 60, 0, 1, false, 3),
-    MAZE_ROSE("maze_rose", "Maze Rose", 70, 0, 1, false, 3);
+    MAZE_ROSE("maze_rose", "Maze Rose", 70, 0, 1, false, 3),
+    ARMOR_BURST("armor_burst", "Armor Burst", 60, 0, 1, false, 3),
+    HEALTH_BURST("health_burst", "Health Burst", 60, 0, 1, false, 3);
 
     public final String id, name;
     public final int mana, duration, maxLevel, cooldownSeconds;

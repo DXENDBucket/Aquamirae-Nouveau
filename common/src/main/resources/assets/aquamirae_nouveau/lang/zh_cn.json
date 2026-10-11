@@ -53,5 +53,15 @@
   "aquamirae_nouveau.description.maze_rose": "以迷宫玫瑰替换弹射物，追踪怪物，命中造成伤害并短暂浮空，随后飞回。不会锁定或命中友军。",
   "aquamirae_nouveau.glyph_name.glyph_maze_rose": "迷宫玫瑰",
   "aquamirae_nouveau.glyph_desc.glyph_maze_rose": "以迷宫玫瑰替换弹射物，追踪怪物，命中造成伤害并短暂浮空，随后飞回。不会锁定或命中友军。",
-  "ars_nouveau.augment_desc.glyph_maze_rose_glyph_accelerate": "提高发射速度。"
+  "ars_nouveau.augment_desc.glyph_maze_rose_glyph_accelerate": "提高发射速度。",
+  "item.aquamirae_nouveau.glyph_armor_burst": "碎甲迸裂",
+  "aquamirae_nouveau.name.armor_burst": "碎甲迸裂",
+  "aquamirae_nouveau.description.armor_burst": "护甲碎裂达到五层时，造成裂解尖刺的额外伤害。",
+  "aquamirae_nouveau.glyph_name.glyph_armor_burst": "碎甲迸裂",
+  "aquamirae_nouveau.glyph_desc.glyph_armor_burst": "护甲碎裂达到五层时，造成裂解尖刺的额外伤害。",
+  "item.aquamirae_nouveau.glyph_health_burst": "碎命迸裂",
+  "aquamirae_nouveau.name.health_burst": "碎命迸裂",
+  "aquamirae_nouveau.description.health_burst": "生命碎裂达到十层时，造成裂解之刃的额外伤害。",
+  "aquamirae_nouveau.glyph_name.glyph_health_burst": "碎命迸裂",
+  "aquamirae_nouveau.glyph_desc.glyph_health_burst": "生命碎裂达到十层时，造成裂解之刃的额外伤害。"
 }

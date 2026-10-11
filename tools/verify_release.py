@@ -39,7 +39,7 @@ def check(platform):
                         namespace, loc = texture.split(':', 1)
                         assert f'assets/{namespace}/textures/{loc}.png' in native_files, f'Missing native texture: {texture}'
             recipes = [n for n in names if n.startswith('data/aquamirae_nouveau/recipe') and n.endswith('.json')]
-            assert len(recipes) == (7 if platform else 8), f'Wrong recipe count: {path}'
+            assert len(recipes) == (9 if platform else 10), f'Wrong recipe count: {path}'
             for name in recipes:
                 recipe = json.loads(z.read(name))
                 glyph = recipe['output'] if platform else recipe['output']['id']

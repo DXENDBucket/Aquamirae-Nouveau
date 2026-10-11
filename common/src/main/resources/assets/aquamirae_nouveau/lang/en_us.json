@@ -53,5 +53,15 @@
   "aquamirae_nouveau.description.maze_rose": "Replace a projectile with a returning maze rose that tracks monsters. It deals damage and briefly levitates targets, ignoring allies.",
   "aquamirae_nouveau.glyph_name.glyph_maze_rose": "Maze Rose",
   "aquamirae_nouveau.glyph_desc.glyph_maze_rose": "Replace a projectile with a returning maze rose that tracks monsters. It deals damage and briefly levitates targets, ignoring allies.",
-  "ars_nouveau.augment_desc.glyph_maze_rose_glyph_accelerate": "Increase launch speed."
+  "ars_nouveau.augment_desc.glyph_maze_rose_glyph_accelerate": "Increase launch speed.",
+  "item.aquamirae_nouveau.glyph_armor_burst": "Armor Burst",
+  "aquamirae_nouveau.name.armor_burst": "Armor Burst",
+  "aquamirae_nouveau.description.armor_burst": "Deal Shatterspike's bonus damage to a target with five levels of Armor Shatter.",
+  "aquamirae_nouveau.glyph_name.glyph_armor_burst": "Armor Burst",
+  "aquamirae_nouveau.glyph_desc.glyph_armor_burst": "Deal Shatterspike's bonus damage to a target with five levels of Armor Shatter.",
+  "item.aquamirae_nouveau.glyph_health_burst": "Health Burst",
+  "aquamirae_nouveau.name.health_burst": "Health Burst",
+  "aquamirae_nouveau.description.health_burst": "Deal Shatterblade's bonus damage to a target with ten levels of Health Shatter.",
+  "aquamirae_nouveau.glyph_name.glyph_health_burst": "Health Burst",
+  "aquamirae_nouveau.glyph_desc.glyph_health_burst": "Deal Shatterblade's bonus damage to a target with ten levels of Health Shatter."
 }

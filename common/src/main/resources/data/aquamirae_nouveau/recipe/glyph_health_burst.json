@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "aquamirae_nouveau:glyph_health_burst",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "aquamirae:shatterblade"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

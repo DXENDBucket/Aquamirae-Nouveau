@@ -28,6 +28,12 @@ GLYPHS = [
     ('maze_rose', 'Maze Rose', '迷宫玫瑰', 'maze_rose', 'maze_rose',
      'Replace a projectile with a returning maze rose that tracks monsters. It deals damage and briefly levitates targets, ignoring allies.',
      '以迷宫玫瑰替换弹射物，追踪怪物，命中造成伤害并短暂浮空，随后飞回。不会锁定或命中友军。'),
+    ('armor_burst', 'Armor Burst', '碎甲迸裂', 'shatterspike', 'shatterspike',
+     'Deal Shatterspike\'s bonus damage to a target with five levels of Armor Shatter.',
+     '护甲碎裂达到五层时，造成裂解尖刺的额外伤害。'),
+    ('health_burst', 'Health Burst', '碎命迸裂', 'shatterblade', 'shatterblade',
+     'Deal Shatterblade\'s bonus damage to a target with ten levels of Health Shatter.',
+     '生命碎裂达到十层时，造成裂解之刃的额外伤害。'),
 ]
 
 def write(relative, data):
@@ -47,6 +53,8 @@ for lang in ['en_us', 'zh_cn']:
         values['aquamirae_nouveau.glyph_desc.glyph_' + id_] = description
         if id_ in ('terrible_chakram', 'maze_rose'):
             values['ars_nouveau.augment_desc.glyph_' + id_ + '_glyph_accelerate'] = 'Increase launch speed.' if lang == 'en_us' else '提高发射速度。'
+            continue
+        if id_ in ('armor_burst', 'health_burst'):
             continue
         values['ars_nouveau.augment_desc.glyph_' + id_ + '_glyph_amplify'] = (
             ('Increase native shard scale and damage.' if id_ == 'abyssal_shard' else 'Strengthen the poison up to Poison V.' if id_ == 'scyphoid_sting' else 'Add effect levels up to the native limit.') if lang == 'en_us'

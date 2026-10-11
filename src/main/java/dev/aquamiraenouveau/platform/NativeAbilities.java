@@ -15,6 +15,7 @@ public final class NativeAbilities {
             case ABYSSAL_SHARD -> new dev.aquamiraenouveau.projectile.AbyssalShardGlyph();
             case TERRIBLE_CHAKRAM, MAZE_ROSE -> new dev.aquamiraenouveau.projectile.ChakramGlyph(ability);
             case SCYPHOID_STING -> new dev.aquamiraenouveau.ScyphoidStingGlyph();
+            case ARMOR_BURST, HEALTH_BURST -> new dev.aquamiraenouveau.ShatterBurstGlyph(ability);
             default -> new dev.aquamiraenouveau.AquamiraeGlyph(ability);
         };
     }

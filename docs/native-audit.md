@@ -71,6 +71,29 @@ NeoForge 本体 HookLivingEntity 按 affected_by_depths_fury / affected_by_depth
 
 旧 ShardCarriers／ShardCarrierMixin 合并为 shared AlliedCarriers／AlliedCarrierMixin，登记只涉及本附属受控载体，普通 Ars 不受影响。Forge 两个钩子的 Minecraft 调用按 refmap 映射到 SRG；发行检查同时核对钩子类、refmap 与最低 Core 0.1.16。
 
+## 武器完整能力与后续候选（dev.6）
+
+本轮按用户要求暂不新增食物来源的状态效果。核对两版实际 JAR 的全部 weapon / armor Ability，以及 Eel、Maw、MazeMother、CaptainCorneliaBoss、Spinefish、TorturedSoul；CFR 输出位于忽略的 `.upstream/dev6-neo/`、`.upstream/dev6-forge/`。没有由名称、tooltip 或 GitHub 分支推测实现。
+
+| 原生能力 | 两版实际行为与接入判断 |
+| --- | --- |
+| ShatterspikeFullAbility | 目标 ARMOR_SHATTER 达到 ShatterspikeBaseAbility 的 max_stacks（默认 5）后 DamageContext.add(bonus)，默认 6，并播放紫水晶破裂声；接入为碎甲迸裂 |
+| ShatterbladeFullAbility | HEALTH_SHATTER 达到默认 10 层后增加默认 4 点，保留相同声音；接入为碎命迸裂 |
+| TidepiercerAbility | 仅实际伤害所有者 isUnderWater 时按海平面以下深度每格 2% 提高伤害，上限额外 200%；可作为后续伤害增强候选，需要核对 Ars 伤害范围与原装备叠加 |
+| TerribleFangBaseAbility | 缺失心数提高伤害，数值来自本体配置；满血目标是否翻倍取决于原生完整能力是否在装备集合激活，不能仅按“满血翻倍”无条件接入 |
+| RemnantSaberAbility | 对 ice_maze_creatures 使用玩家本体长期击杀加成，最大值来自配置；回血仅 Captain Cornelia 实体，不能把它写成普遍吸血 |
+| TempestTridentAbility | 虽声明 duration / shock_duration，实际 modifyOutgoingDamage 是水下乘以 1 + duration；未出现通用电击或闪电入口，暂缓，不能凭名称编造雷击 |
+| DaggerOfGreedAbility | 概率产出绿宝石，同时有概率直接缩减 self 主手堆叠；不适合直接调用为魔符，可能损坏施法工具 |
+| TerribleBladeFullAbility | 击杀已中毒目标后给 self 再生，来自装备而非食物；Neo 回调带 DamageSource，Forge 回调不带；可考虑后续击杀增强，需要实际击杀时序与结算设计 |
+| AbyssalArmorFullSetWithHeaumeAbility | 32 格内把正在攻击其他玩家的 Mob 改为以 self 为目标；直接全域调用会覆盖友军与玩家队伍目标，需 opt-in 候选过滤后再适配 |
+| AbyssalArmorFullSetWithTiaraAbility | 原生死亡取消、恢复满血、结晶化，涉及特殊伤害豁免与事件；沿用结晶化双版差异暂缓 |
+| SalvagerArmorFullSetAbility | 此 Ability 类只有描述和变量集合，没有可直接调用的完整攻击入口，需查真实事件／装备实现 |
+| 鳗鱼与船长攻击 | 特殊吸血、拉扯与群体动作分布于实体 baseTick、AI、动画和 Boss 状态；直接隐藏生成 Boss 或复制局部逻辑均不采用 |
+
+新 shared ShatterBurstGlyph 只接适用且存活的实体，排除 Conflux 原施法者友军。平台 NativeShatterBursts 以原生 DamageContext(0) 调用实际完整能力并取 result；没有复制阈值或额外伤害公式，也不重放武器基础能力或消耗状态。两版唯一桥接差异为 DamageContext 包名。
+原武器是对既有攻击追加伤害；魔符将这段增量作为独立条件伤害效果。未满层返回 0，甚至法术伤害加成也不能绕过条件。满层后使用实际 Ars IDamageEffect.attemptDamage 和 GENERIC_SPELL_DAMAGE 保留加成、Pre/Post 事件、原生伤害拒绝与伤害所有者；付款者仍为原施法者。资源触发只对伤害成功返回 true。原生装备能力继续由世界伤害管线处理，不抑制它们，不宣称基础 6／4 是无条件最终伤害。
+两项魔符不支持增强或延时，默认 Tier 1、60 Mana／3 秒冷却，配置只增加费用与冷却条目。来源图标／抄写材料为对应原武器，仍是来源 ×1、魔源宝石 ×1、27 XP。没有新实体或 Mixin。
+
 ## 暂未接入的已知差异
 
 - Forge 7.1.14 `CrystallizationEffect.removeAttributeModifiers` 在原生效果结束时造成 `999999.0f` 点 crystallization 伤害；NeoForge 7.2.11 对应效果仅注册攻击伤害/速度修饰。无法视为同一个普通双版减益，本批不提供结晶化魔符。
