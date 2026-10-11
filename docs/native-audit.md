@@ -80,7 +80,7 @@ NeoForge 本体 HookLivingEntity 按 affected_by_depths_fury / affected_by_depth
 | ShatterspikeFullAbility | 目标 ARMOR_SHATTER 达到 ShatterspikeBaseAbility 的 max_stacks（默认 5）后 DamageContext.add(bonus)，默认 6，并播放紫水晶破裂声；接入为碎甲迸裂 |
 | ShatterbladeFullAbility | HEALTH_SHATTER 达到默认 10 层后增加默认 4 点，保留相同声音；接入为碎命迸裂 |
 | TidepiercerAbility | 仅实际伤害所有者 isUnderWater 时按海平面以下深度每格 2% 提高伤害，上限额外 200%；可作为后续伤害增强候选，需要核对 Ars 伤害范围与原装备叠加 |
-| TerribleFangBaseAbility | 缺失心数提高伤害，数值来自本体配置；满血目标是否翻倍取决于原生完整能力是否在装备集合激活，不能仅按“满血翻倍”无条件接入 |
+| TerribleFangBaseAbility | 缺失心数提高伤害，Neo 数值来自本体配置，Forge 为原生常量；满血目标是否翻倍取决于原生完整能力是否在装备集合激活，不能仅按“满血翻倍”无条件接入 |
 | RemnantSaberAbility | 对 ice_maze_creatures 使用玩家本体长期击杀加成，最大值来自配置；回血仅 Captain Cornelia 实体，不能把它写成普遍吸血 |
 | TempestTridentAbility | 虽声明 duration / shock_duration，实际 modifyOutgoingDamage 是水下乘以 1 + duration；未出现通用电击或闪电入口，暂缓，不能凭名称编造雷击 |
 | DaggerOfGreedAbility | 概率产出绿宝石，同时有概率直接缩减 self 主手堆叠；不适合直接调用为魔符，可能损坏施法工具 |
@@ -94,11 +94,56 @@ NeoForge 本体 HookLivingEntity 按 affected_by_depths_fury / affected_by_depth
 原武器是对既有攻击追加伤害；魔符将这段增量作为独立条件伤害效果。未满层返回 0，甚至法术伤害加成也不能绕过条件。满层后使用实际 Ars IDamageEffect.attemptDamage 和 GENERIC_SPELL_DAMAGE 保留加成、Pre/Post 事件、原生伤害拒绝与伤害所有者；付款者仍为原施法者。资源触发只对伤害成功返回 true。原生装备能力继续由世界伤害管线处理，不抑制它们，不宣称基础 6／4 是无条件最终伤害。
 两项魔符不支持增强或延时，默认 Tier 1、60 Mana／3 秒冷却，配置只增加费用与冷却条目。来源图标／抄写材料为对应原武器，仍是来源 ×1、魔源宝石 ×1、27 XP。没有新实体或 Mixin。
 
+## 剩余弹射物与效果考察（2026-10-12，仅研究）
+
+用户要求考察剩余弹射物替换或 effect，继续暂缓食物来源状态效果。本节是候选设计与接入判断，没有新增魔符、提高 VERSION、构建或部署。
+沿用独立附属工作树 `parallel-workspaces/aquamirae-first-abilities/Aquamirae-Nouveau`，分支 `agent/aquamirae-first-abilities`，研究前 HEAD 为 `53543514d2ff8909febcef8d25a2b07d9b8dcbc9`。固定 Core 仍为独立 `Ars-Conflux-allies` 的 `b24f18d72e64a902ff6c966040b0b83ea3cc6226`，检查受版本控制文件无变化。
+
+### 弹射物盘点
+
+发行 JAR 的全部原生 projectile 类、EntityType 注册以及全部 common/item 类再次核对。两版共同的完整自定义载荷只有 TerribleChakram、MazeRose；Neo 另有 AbyssalShard，三者已经接入。AbstractChakram、AbstractShard、AbstractHomingShard 是基类，不算新的独立能力。
+
+`tempest_trident` 和 `tidepiercer` 在 Neo 的 AquamiraeItems 注册为 SwordItem，在 Forge 注册为继承 SwordItem 的 AquamiraeSwordItem；没有原版 ThrownTrident 的发射入口。两版 TempestTridentAbility 的实际实现都是水下将伤害乘以 `1 + duration`（默认 duration 20），没有 tooltip 所说的超导状态、链式放电和电击入口。不能按武器名称制造“原生三叉戟替换”或把描述中的未实现能力补写成联动。
+ShellHornItem 生成的是 Captain Cornelia Boss 及其遭遇事件，也不是弹射物。
+
+结论：当前两版没有找到尚未接入、适合继续做完整原生替换的独立弹射物。后续优先 effect 与条件伤害增强。
+
+### 候选优先级与类别
+
+以下名称为附属候选名，资源与材料均指原模组真实来源；持续时间、费用和魔符等级尚未确定。
+
+| 顺序 | 候选 / 来源 | 原生行为 | 建议类别与接入判断 |
+| --- | --- | --- | --- |
+| 1 | 挑衅 / 深海重盔 `abyssal_heaume` | AbyssalArmorFullSetWithHeaumeAbility：以 self 包围盒向各轴扩张 32 格，查询 Mob；仅把当前正在攻击其他玩家的 Mob 目标改为 self，不吸引闲置怪物 | effect；适合作为自身施法的队友保护能力。公开完整回调可调用，查询结果需仅在本附属调用期间过滤友军；没有实际目标改变时不计费。原生是伤害回调触发，改为主动 effect 是明确的附属设计 |
+| 2 | 潜水守护 / 潜水头盔 `salvager_helmet`（原能力来自整套潜水装备） | 空气耗至 0 以下时补到 280 并播放 EVENT_AIR_SUPPLY；处于套装分支时跳过冰迷宫冷水每 tick 增加 4 的冻结累积 | 持续 effect；区别于单独的水下呼吸，包含本体冷水规则豁免。完整实现位于玩家 tick 的私有方法，需限定在本附属效果生效玩家上接通原生套装判断，不能只调用空的 SalvagerArmorFullSetAbility，也不应复制空气／冻结算法；中等接入成本 |
+| 3 | 毒杀再生 / 可怖之刃 `terrible_blade` | TerribleBladeFullAbility：在伤害回调看到目标已死亡且仍中毒时给实际攻击者再生，默认 II、6 秒，数值两版均读原生配置 | 更适合作为伤害增强；也可评估接在伤害后执行的条件 effect。应只认可本次法术实际击杀，不能对已有尸体重复换取治疗；须核对毒素与死亡清理时序、原生装备重复触发和一次结算。不采用无条件再生 |
+| 4 | 冷光气泡 / `luminescent_bubble` | 原生气泡是可放置的含水方块，光照 15；每 20 tick 查询方块包围盒向各轴扩张 8 格内的水中玩家，给予海豚的恩惠 II、80 tick；原生泡泡粒子 | 放置型 effect；原物品在使用者头顶的水中放置，与原生块表现可对应。原块永久且右键可收回物品，法术召唤需要独立临时实例、无掉落／无回收、到期还水、区块重载与权限处理。不能用可回收原块无限产出来源材料；不是补气能力 |
+| 5 | 深潜增伤 / 潮汐穿刺者 `tidepiercer` | 实际攻击者必须 isUnderWater；海平面以下每格额外 2%，最大额外 200%，两版一致 | 伤害增强；原生公开 modifyOutgoingDamage 可复用，应该作用于已有伤害，不能以 DamageContext(0) 获得倍率伤害。限定当前法术的 Ars 伤害事件，核对原生装备已施加时的重复乘算；不另造固定伤害 effect |
+| 6 | 残血增伤 / 可怖獠牙 `terrible_fang` | 每缺少完整一颗心默认额外 15%，最高额外 150%；Neo 可配置，Forge 使用常量。仅原生完整能力实际激活且目标满血时，额外加成再翻倍 | 伤害增强；公开完整入口可复用，优先保留基础残血规则。不能仅凭写了此增强就冒充原生完整装备能力，也不能把“加成翻倍”写成最终伤害翻倍；同样需排除原生装备重复乘算 |
+
+若下一轮只实施一项，优先挑衅；若选择辅助路线，优先潜水守护。两者各有明确的原生行为与装备来源，两平台均存在。毒杀再生与现有水母蜇刺／可怖环刃有组合价值，但实现前需要击杀来源与事件时序验证。冷光气泡有原生可见表现，但临时方块生命周期比普通状态 effect 更复杂。纯增伤增强排在后面，避免重复提供与 Ars 普通伤害效果相似的独立攻击。
+
+### 继续暂缓或不选
+
+- 深海头饰 `abyssal_tiara` 的死亡延缓：两版公开 cancelDeath 都恢复满血并给予默认 300 秒结晶化，拒绝重复结晶化及对应致命伤害。现在确认两版移除结晶化都可触发致命伤害，参见下一节；作为保护 effect 有原生来源，但需专门设计预先施加保护、死亡取消、消耗与净化时序，暂不作为首选，也不把结晶化直接做普通攻击减益。
+- 深海半套装备的负面状态转力量：原生每次有害效果加入后叠力量，最大 amplifier 2，即 III；适合未来响应类能力。不能伪造一次负面状态加入来调用，也不是随时可用的普通力量 effect。
+- 可怖盔甲的受击反毒／水下海豚恩惠：真实装备来源，但与已有水母毒素及冷光气泡重叠，优先级较低。
+- RemnantSaberAbility 的回血仅对 Captain Cornelia，不是通用吸血；DaggerOfGreedAbility 另有 1% 缩减主手堆叠，直接调用可能消耗法术工具，暂不选。
+- Eel 吸血在动画攻击帧里按目标实际掉血的两倍回血；Maw、MazeMother、TorturedSoul 的普通攻击没有新的独立载荷。Captain Cornelia 拉扯、怒潮及视觉闪电依赖 Boss 动画／阶段／遭遇事件；没有找到可独立完整调用、适合这批 spell effect 的入口。不能通过隐形 Boss 或复制局部 AI 伪装适配。
+- DreadwakeTier3Ability 声明了再生、伤害吸收和碎晶变量，但该类没有处理回调；不能将变量或 tooltip 当作完整可调用能力。
+- DevouringCurse 实际食品来源为虚空鱿鱼，TorturedSoul 不施加该效果；MaelstromOmen 仅 Forge，来源为可饮用 NiveisTearItem，并涉及跨维度旅行。二者均不进入本轮非食物来源清单。原生持续毒免疫的问题仍保留，不通过附属修补。
+
+### 本轮证据与未验证项
+
+以 CFR 0.152 再次读取两版实际发行 JAR，新增输出仅放忽略目录 `.upstream/candidate-audit-neo/` 与 `.upstream/candidate-audit-forge/`，没有复制原生代码或素材到受控源码／发行包。关键入口为上述 Ability 类，Neo `HookPlayer.tickSalvagerArmor` / Forge `PlayerHandler.tickSalvagerArmor`、两版 `LuminescentBubbleBlock.tick`，以及 Neo 的结晶化移除事件调用链。
+本轮计算 Aquamirae JAR SHA-256 与依赖锁一致：Neo `5b8b2d04e16755d354adf3dfa77f906e33509722e647b1b5fdd5ccebabc8a35e`；Forge `5439edc57af3075a1600effe0906ba322e89346077bcb80b761a4bff4cbff59b`。物品中文名来自各自 JAR 的 `assets/aquamirae/lang/zh_cn.json`，实现判断不依据 tooltip。
+仅文档变化，不运行 Gradle 或 GameTest，不产生新 JAR，不向人工测试目录复制任何文件，不改变 Core 基线。候选的 Ars 组合、友军处理、扣费、生命周期与客户端表现均尚未实现或验证；上文优先级是基于原生实现的设计判断。
+
 ## 暂未接入的已知差异
 
-- Forge 7.1.14 `CrystallizationEffect.removeAttributeModifiers` 在原生效果结束时造成 `999999.0f` 点 crystallization 伤害；NeoForge 7.2.11 对应效果仅注册攻击伤害/速度修饰。无法视为同一个普通双版减益，本批不提供结晶化魔符。
+- Forge 7.1.14 `CrystallizationEffect.removeAttributeModifiers` 在原生效果移除时直接造成 `999999.0f` 点 crystallization 伤害。补核 NeoForge 7.2.11 的完整调用链：`MixinLivingEntity.onEffectRemoved` → `HookLivingEntity.onEffectRemoved` → `ServerLevelHelper.triggerEvent` → `CrystallizationEvent.tick`，同样造成 `999999.0f` 点伤害，只是由服务器事件执行。此前仅检查 Neo 效果类、将其视作只有属性修饰的记录不完整。两版都不能作为普通可净化减益接入；死亡延缓候选需核对完整死亡与移除时序。
 - NeoForge 7.2.11 `PoisonImmunityEffect.applyEffectTick` 返回 `entity.removeEffect(POISON)`。没有毒素时返回 false，Minecraft 1.21.1 的效果更新会移除该效果；Forge 的对应 tick 方法无返回值。未宣称两版具有相同持续免疫行为，本批不提供该魔符或修补原生效果。
-- DevouringCurse 是针对玩家食物/饥饿伤害的特殊本体机制；本批不将其伪装成通用生物持续伤害。
+- DevouringCurse 是针对玩家食物/饥饿伤害的特殊本体机制；实际物品来源是 `void_squid` 食品，两版 TorturedSoul 攻击均没有施加该诅咒。不列入本轮非食物来源候选，也不将其伪装成通用生物持续伤害。
 - 首批暂缓的回旋镖已在 dev.5 接入；两版路径差异与最大生存期由上述平台桥接和执行会话处理。
 
 ## 许可和边界
