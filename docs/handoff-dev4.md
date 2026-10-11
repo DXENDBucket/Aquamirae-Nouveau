@@ -5,6 +5,7 @@
 ## 范围与固定基线
 
 - 附属工作树：C:/Users/57991/Documents/MinecraftDev/parallel-workspaces/aquamirae-first-abilities/Aquamirae-Nouveau；分支 agent/aquamirae-first-abilities。
+- 实现提交：b97e346a9908043bc0ee596f27b078c18a131abd；后续仅补本交接提交信息，不改变发行包。
 - 新 Core 构建副本：C:/Users/57991/Documents/MinecraftDev/parallel-workspaces/aquamirae-first-abilities/Ars-Conflux-allies；detached 固定 b24f18d72e64a902ff6c966040b0b83ea3cc6226（0.1.16）。
 - 用户确认新 API 已本地提交后才创建该副本，两平台 settings.gradle 指向此副本。旧 3eccd65 副本保留，workspace.json 记录迁移理由和原基线；两个副本受版本控制文件均未改变。
 - NeoForge 1.21.1 / Java 21 / Aquamirae 7.2.11 / Ars 5.13.3；Forge 1.20.1 / Java 17 / Aquamirae 7.1.14 / Ars 4.12.7。
