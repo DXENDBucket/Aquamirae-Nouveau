@@ -1,0 +1,38 @@
+[
+  {
+    "file": "aquamirae-forge1201.jar",
+    "modid": "aquamirae",
+    "version": "7.1.14",
+    "sha256": "5439edc57af3075a1600effe0906ba322e89346077bcb80b761a4bff4cbff59b"
+  },
+  {
+    "file": "ars-nouveau-forge1201.jar",
+    "modid": "ars_nouveau",
+    "version": "4.12.7",
+    "sha256": "1f1debc282a0c379c1141f2840ea294eede6f6b544c589663f40bbe17b59a1af"
+  },
+  {
+    "file": "curios-forge1201.jar",
+    "modid": "curios",
+    "version": "5.14.1+1.20.1",
+    "sha256": "1e817919a35b37cf30524aaec73f0ca5130452f23f168f844854df282eb8e51f"
+  },
+  {
+    "file": "fragmentum-forge1201.jar",
+    "modid": "fragmentum",
+    "version": "5.2.0",
+    "sha256": "a003fedce92c52ef377e48fc3779cb2506be1ce7f947c88f1eb241b2992c16b4"
+  },
+  {
+    "file": "geckolib-forge1201.jar",
+    "modid": "geckolib",
+    "version": "4.8.4",
+    "sha256": "4518779a31b6c2abb92c98b5ad17ef3d60177df68626bfc86c44de2764913c2b"
+  },
+  {
+    "file": "patchouli-forge1201.jar",
+    "modid": "patchouli",
+    "version": "1.20.1-85-FORGE",
+    "sha256": "05f7b5d52f6b8f0fd7f8b4822fa07a192d1394d83a264309c9d221d6d4fd21c5"
+  }
+]

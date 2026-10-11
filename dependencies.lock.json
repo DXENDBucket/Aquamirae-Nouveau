@@ -1,0 +1,38 @@
+[
+  {
+    "file": "aquamirae.jar",
+    "modid": "aquamirae",
+    "version": "7.2.11",
+    "sha256": "5b8b2d04e16755d354adf3dfa77f906e33509722e647b1b5fdd5ccebabc8a35e"
+  },
+  {
+    "file": "ars.jar",
+    "modid": "ars_nouveau",
+    "version": "5.13.3",
+    "sha256": "45c1b6022d8e63464177c1f822bda22c3d6fb66970857fd7677e4e3ccffd259f"
+  },
+  {
+    "file": "curios.jar",
+    "modid": "curios",
+    "version": "9.5.1+1.21.1",
+    "sha256": "a45df2125c26219974aba7507ffc9afe7b83acc941a386af3faacb1cc0056fde"
+  },
+  {
+    "file": "fragmentum.jar",
+    "modid": "fragmentum",
+    "version": "5.2.0",
+    "sha256": "9efb8f62efed0d2da4fdea64d2c5e9d4a84a2ecce21e8178b6d36326d9a9d908"
+  },
+  {
+    "file": "geckolib.jar",
+    "modid": "geckolib",
+    "version": "4.9.3",
+    "sha256": "20a1995e4074f387ff549e2c57ea79dd7d41ee83c6afb9dd6a6e840e592d1c47"
+  },
+  {
+    "file": "patchouli.jar",
+    "modid": "patchouli",
+    "version": "1.21.1-93-NEOFORGE",
+    "sha256": "959af52ed6640c316c3a8469203420be4aeea11ad6603890ba83bf48f5d9f993"
+  }
+]

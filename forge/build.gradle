@@ -1,0 +1,110 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+plugins {
+    id 'java-library'
+    id 'net.minecraftforge.gradle' version '6.0.36'
+    id 'org.spongepowered.mixin' version '0.7.38'
+}
+group = 'dev.aquamiraenouveau'
+version = file('../VERSION').text.trim()
+base { archivesName = 'aquamirae-nouveau' }
+java { toolchain.languageVersion = JavaLanguageVersion.of(17); withSourcesJar() }
+repositories { flatDir { dirs 'libs' }; mavenCentral { content { excludeGroup 'local' } } }
+sourceSets.main { java.srcDir '../common/src/main/java' }
+sourceSets { gameTest { compileClasspath += sourceSets.main.output; runtimeClasspath += sourceSets.main.output } }
+configurations {
+    gameTestImplementation.extendsFrom implementation
+    gameTestCompileOnly.extendsFrom compileOnly
+    gameTestRuntimeOnly.extendsFrom runtimeOnly
+}
+evaluationDependsOn(':ars-conflux')
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        configureEach {
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            args '--mixin.config', 'ars_conflux.mixins.json'
+        }
+        client { workingDirectory file('run/client'); mods { ars_conflux { source project(':ars-conflux').sourceSets.main }; aquamirae_nouveau { source sourceSets.main } } }
+        server { workingDirectory file('run/server'); args '--nogui'; mods { ars_conflux { source project(':ars-conflux').sourceSets.main }; aquamirae_nouveau { source sourceSets.main } } }
+        gameTestServer {
+            workingDirectory file('run/gametest')
+            property 'forge.enabledGameTestNamespaces', 'aquamirae_nouveau'
+            jvmArgs '-Xmx2G'
+            mods { ars_conflux { source project(':ars-conflux').sourceSets.main }; aquamirae_nouveau { source sourceSets.main; source sourceSets.gameTest } }
+        }
+    }
+}
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.0'
+    implementation project(':ars-conflux')
+    for (name in ['ars-nouveau', 'curios', 'geckolib', 'patchouli', 'aquamirae', 'fragmentum']) {
+        implementation fg.deobf("local:${name}:forge1201")
+    }
+}
+def bridges = layout.buildDirectory.dir('generated/bridges')
+def generateConfig = tasks.register('generateConfig') {
+    inputs.file '../src/main/java/dev/aquamiraenouveau/platform/AquamiraeConfig.java'
+    outputs.dir bridges
+    doLast {
+        def text = file('../src/main/java/dev/aquamiraenouveau/platform/AquamiraeConfig.java').getText('UTF-8')
+                .replace('net.neoforged.neoforge.common.ModConfigSpec', 'net.minecraftforge.common.ForgeConfigSpec').replace('ModConfigSpec', 'ForgeConfigSpec')
+        def out = new File(bridges.get().asFile, 'dev/aquamiraenouveau/platform/AquamiraeConfig.java')
+        out.parentFile.mkdirs(); out.setText(text, 'UTF-8')
+    }
+}
+sourceSets.main.java.srcDir bridges
+tasks.named('compileJava') { dependsOn generateConfig }
+tasks.named('sourcesJar') { dependsOn generateConfig }
+def testBridges = layout.buildDirectory.dir('generated/test-bridges')
+def generateTests = tasks.register('generateForgeTests') {
+    inputs.file '../src/gameTest/java/dev/aquamiraenouveau/AbilityGameTests.java'
+    outputs.dir testBridges
+    doLast {
+        def text = file('../src/gameTest/java/dev/aquamiraenouveau/AbilityGameTests.java').getText('UTF-8')
+                .replace('template="empty"', 'template="empty", templateNamespace="aquamirae_nouveau"')
+                .replace('net.neoforged.neoforge.gametest', 'net.minecraftforge.gametest')
+                .replace('net.neoforged.neoforge.common.util', 'net.minecraftforge.common.util')
+                .replace('CapabilityRegistry.getMana(p)', 'CapabilityRegistry.getMana(p).orElseThrow(IllegalStateException::new)')
+                .replace('net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE.wrapAsHolder(com.hollingsworth.arsnouveau.api.perk.PerkAttributes.MAX_MANA.get())', 'com.hollingsworth.arsnouveau.api.perk.PerkAttributes.MAX_MANA.get()')
+        def out = new File(testBridges.get().asFile, 'dev/aquamiraenouveau/AbilityGameTests.java')
+        out.parentFile.mkdirs(); out.setText(text, 'UTF-8')
+    }
+}
+sourceSets.gameTest.java.srcDir testBridges
+tasks.named('compileGameTestJava') { dependsOn generateTests }
+def resources = layout.buildDirectory.dir('generated/resources')
+def generateResources = tasks.register('generateForgeResources') {
+    inputs.dir '../common/src/main/resources'
+    outputs.dir resources
+    doLast {
+        fileTree('../common/src/main/resources').files.each { source ->
+            def relative = file('../common/src/main/resources').toPath().relativize(source.toPath()).toString().replace('\\', '/')
+            if (relative.endsWith('/glyph_abyssal_shard.json')) return
+            def text = source.getText('UTF-8')
+            if (relative.startsWith('data/aquamirae_nouveau/recipe/')) {
+                def recipe = new JsonSlurper().parseText(text)
+                text = JsonOutput.prettyPrint(JsonOutput.toJson([type: recipe.type, exp: recipe.exp, output: recipe.output.id, count: recipe.output.count, inputItems: recipe.inputs.collect { [item: it] }])) + '\n'
+                relative = relative.replace('/recipe/', '/recipes/')
+            }
+            def out = new File(resources.get().asFile, relative)
+            out.parentFile.mkdirs(); out.setText(text, 'UTF-8')
+        }
+    }
+}
+sourceSets.main.resources.srcDir resources
+tasks.named('processResources') {
+    dependsOn generateResources
+    inputs.property 'version', project.version
+    filesMatching('META-INF/mods.toml') { expand(version: project.version) }
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+tasks.named('jar') {
+    from('../LICENSE', '../THIRD_PARTY_NOTICES.md')
+    archiveFileName = "aquamirae-nouveau-${project.version}-mc1.20.1-forge.jar"
+    finalizedBy 'reobfJar'
+}
+tasks.named('sourcesJar') { from('../LICENSE', '../THIRD_PARTY_NOTICES.md') }

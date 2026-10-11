@@ -1,0 +1,4 @@
+pluginManagement { repositories { gradlePluginPortal(); maven { url = 'https://maven.minecraftforge.net' }; maven { url = 'https://repo.spongepowered.org/repository/maven-public/' } } }
+rootProject.name = 'aquamirae-nouveau-forge'
+include ':ars-conflux'
+project(':ars-conflux').projectDir = file(providers.gradleProperty('confluxCheckout').getOrElse('../../Ars-Conflux/forge'))

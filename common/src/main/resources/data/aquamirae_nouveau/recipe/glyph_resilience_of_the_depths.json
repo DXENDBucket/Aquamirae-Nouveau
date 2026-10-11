@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "aquamirae_nouveau:glyph_resilience_of_the_depths",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "aquamirae:luminescent_bubble"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

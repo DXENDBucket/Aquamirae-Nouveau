@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "aquamirae_nouveau:glyph_health_shatter",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "aquamirae:abyssal_amethyst"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

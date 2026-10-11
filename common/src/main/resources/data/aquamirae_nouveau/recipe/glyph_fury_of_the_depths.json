@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "aquamirae_nouveau:glyph_fury_of_the_depths",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "aquamirae:terrible_fang"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}
