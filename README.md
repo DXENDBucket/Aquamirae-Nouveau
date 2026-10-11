@@ -2,7 +2,7 @@
 
 独立的海灵物语与 Ars Nouveau 联动附属，使用 Ars Conflux 中立 API。
 显示名称：**Aquamirae & Nouveau**；Mod ID：`aquamirae_nouveau`；作者 EndXiom；附属代码许可 MIT。
-当前版本 **0.1.0-dev.2**。原模组由 Obscuria 开发；本项目不代表其官方，也不打包原模组代码或素材。
+当前版本 **0.1.0-dev.3**。原模组由 Obscuria 开发；本项目不代表其官方，也不打包原模组代码或素材。
 
 | 平台 | Java | 原模组验证基线 | Ars 验证基线 |
 | --- | --- | --- | --- |
@@ -31,7 +31,7 @@
 深海属性的装备和伤害收益完全由原模组处理；它们不是固定的最终伤害或减伤百分比。
 生命碎裂降低的是生命上限，原生移除与健康值处理保持不变；效果结束不会自动补血。
 
-深渊碎晶通过 Conflux ProjectileForm 消耗原 Ars 弹射物生成，场上只有替换后的碎晶。普通弹射物使用本体敌对目标筛选、16 格追踪、液体阻力、虚弱、分裂和 200 tick 生命周期。继承本体碎晶类并引用本体渲染器，不修改普通原生实体。
+深渊碎晶通过 Conflux ProjectileForm 消耗原 Ars 弹射物生成，场上只有替换后的碎晶。主碎晶可直接碰撞普通生物；16 格追踪针对敌对生物和正在攻击所有者的生物，包含不继承 Monster 的史莱姆、岩浆怪。继续使用本体追踪运动、液体阻力、虚弱、分裂和 200 tick 生命周期。继承本体碎晶类并引用本体渲染器，不修改普通原生实体。
 增强将原生尺寸每次加 0.2，尺寸上限 2，相应提高原生伤害，并改变其原生追踪建立速度；子碎晶仍固定尺寸 0.5。
 主碎晶命中实体或方块时续接后续 Ars 魔符，保留目标、所有者、付款者与入射方向。原生分裂生成的三个子碎晶只保留本体伤害和虚弱，不续接 Ars 魔符、不再次扣费。
 环绕及其他 Core 已登记的受控形态通过 ArsTrajectory 保留原轨迹和碰撞；替换实体停止原生移动/碰撞，客户端同步控制模式，避免两个驱动器。重复命中形态每次命中支付载荷费，保持完整、不分裂；单次命中形态在生成时支付一次。
@@ -66,4 +66,4 @@ Forge `jar` 会执行 `reobfJar`；只使用重混淆后的最终 JAR。两版�
 根目录 `python tools/verify_release.py` 验证 NeoForge 产物，加 `--forge` 验证 Forge 产物。
 `tools/generate_resources.py` 维护共享的中英文本、NeoForge 配方和贴图引用；Forge 构建转换为 Ars 4 的配方格式。
 
-本体差异和未接入能力见 [原生行为核对](docs/native-audit.md)，当前验证与产物见 [dev.2 交接](docs/handoff-dev2.md)，[首批交接](docs/handoff-first-abilities.md)保留历史记录。
+本体差异和未接入能力见 [原生行为核对](docs/native-audit.md)，当前验证与产物见 [dev.3 交接](docs/handoff-dev3.md)，[dev.2 交接](docs/handoff-dev2.md)和[首批交接](docs/handoff-first-abilities.md)保留历史记录。

@@ -52,6 +52,90 @@ public final class ShardGameTests {
     private static SpellResolver resolver(GameTestHelper h, ServerPlayer p, Spell spell) {
         return new SpellResolver(new SpellContext(h.getLevel(), spell, p, LivingCaster.from(p), ItemStack.EMPTY));
     }
+    private static void aimAt(ServerPlayer p, LivingEntity target) {
+        var direction = target.getBoundingBox().getCenter().subtract(p.getEyePosition());
+        p.setYRot((float) (-Math.atan2(direction.x, direction.z) * 180 / Math.PI));
+        p.setXRot((float) (-Math.atan2(direction.y, direction.horizontalDistance()) * 180 / Math.PI));
+    }
+    @GameTest(template="empty", batch="aqua_shard", timeoutTicks=40)
+    public static void bareShardSpellDamagesIdleSlime(GameTestHelper h) {
+        assertBareSpellHits(h, EntityType.SLIME);
+    }
+    @GameTest(template="empty", batch="aqua_shard", timeoutTicks=40)
+    public static void bareShardSpellDamagesIdleMagmaCube(GameTestHelper h) {
+        assertBareSpellHits(h, EntityType.MAGMA_CUBE);
+    }
+    private static void assertBareSpellHits(GameTestHelper h, EntityType<? extends net.minecraft.world.entity.monster.Slime> type) {
+        var p = player(h); var target = type.create(h.getLevel());
+        target.setSize(2, true); target.setNoAi(true); target.setNoGravity(true);
+        target.setPos(p.position().add(3, 0, 0));
+        target.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100); target.setHealth(100);
+        h.getLevel().addFreshEntity(target); aimAt(p, target);
+        try {
+            h.assertTrue(target.getTarget() == null, "Idle slime has no attacking target");
+            var r = resolver(h, p, new Spell(MethodProjectile.INSTANCE, glyph()));
+            h.assertTrue(r.onCast(ItemStack.EMPTY, h.getLevel()), "Projectile plus shard casts without a damage glyph");
+            var primary = shard(h, p);
+            h.runAfterDelay(8, () -> {
+                try {
+                    h.assertTrue(target.getHealth() < 100, "Bare native payload damages idle target without an Ars damage effect");
+                    if (type == EntityType.SLIME)
+                        h.assertTrue(Math.abs(target.getHealth() - 90) < .001, "Unarmored slime receives ten native damage");
+                    h.assertTrue(target.hasEffect(MobEffects.WEAKNESS) && primary.isRemoved(), "Native impact inflicts Weakness and breaks the shard");
+                    h.succeed();
+                } finally { target.discard(); cleanup(h, p); }
+            });
+        } catch (RuntimeException error) { target.discard(); cleanup(h, p); throw error; }
+    }
+    @GameTest(template="empty", batch="aqua_shard", timeoutTicks=80)
+    public static void idleSlimeIsTrackedOffTheOriginalFlightLine(GameTestHelper h) {
+        var p = player(h); var target = EntityType.SLIME.create(h.getLevel());
+        target.setSize(2, true); target.setNoAi(true); target.setNoGravity(true);
+        target.setPos(p.position().add(3, 0, 3));
+        target.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100); target.setHealth(100);
+        h.getLevel().addFreshEntity(target);
+        try {
+            var r = resolver(h, p, new Spell(MethodProjectile.INSTANCE, glyph()));
+            h.assertTrue(r.onCast(ItemStack.EMPTY, h.getLevel()), "Bare shard shoots past off-axis idle slime");
+            var primary = shard(h, p);
+            // Begin at the native mature homing strength, without changing the aim toward the slime.
+            primary.tickCount = 30;
+            h.runAfterDelay(60, () -> {
+                try {
+                    h.assertTrue(target.getHealth() < 100 && primary.isRemoved(), "Native homing acquires Enemy implementations without an attack target");
+                    h.succeed();
+                } finally { target.discard(); cleanup(h, p); }
+            });
+        } catch (RuntimeException error) { target.discard(); cleanup(h, p); throw error; }
+    }
+    @GameTest(template="empty", batch="aqua_shard", timeoutTicks=40)
+    public static void passiveAnimalAndVillagerReceiveContactAndContinuation(GameTestHelper h) {
+        var players = new ArrayList<ServerPlayer>();
+        var targets = new ArrayList<LivingEntity>();
+        var markers = new ArrayList<Marker>();
+        try {
+            for (var type : List.of(EntityType.COW, EntityType.VILLAGER)) {
+                var p = player(h); p.setPos(p.position().add(0, 0, players.size() * 10)); players.add(p);
+                var target = type.create(h.getLevel()); targets.add(target);
+                target.setNoAi(true); target.setNoGravity(true); target.setPos(p.position().add(3, 0, 0));
+                target.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100); target.setHealth(100);
+                h.getLevel().addFreshEntity(target); aimAt(p, target);
+                var marker = new Marker(); markers.add(marker);
+                var r = resolver(h, p, new Spell(MethodProjectile.INSTANCE, glyph(), marker));
+                h.assertTrue(r.onCast(ItemStack.EMPTY, h.getLevel()), "Real shot aims at passive target");
+            }
+            h.runAfterDelay(8, () -> {
+                try {
+                    for (int i = 0; i < targets.size(); i++) {
+                        var target = targets.get(i); var marker = markers.get(i);
+                        h.assertTrue(target.getHealth() < 100 && target.hasEffect(MobEffects.WEAKNESS), "Contact damages passive target");
+                        h.assertTrue(marker.hits == 1 && marker.victim == target && marker.owner == players.get(i), "Passive contact continues once with original ownership");
+                    }
+                    h.succeed();
+                } finally { targets.forEach(Entity::discard); players.forEach(p -> cleanup(h, p)); }
+            });
+        } catch (RuntimeException error) { targets.forEach(Entity::discard); players.forEach(p -> cleanup(h, p)); throw error; }
+    }
     @GameTest(template="empty", batch="aqua_shard", timeoutTicks=40)
     public static void realSpawnReplacementBillsOnceAndVanillaIsUnaffected(GameTestHelper h) {
         var p = player(h); var marker = new Marker();
@@ -167,7 +251,7 @@ public final class ShardGameTests {
             CapabilityRegistry.getMana(p).setMana(0);
             var carrier = new EntityProjectileSpell(h.getLevel(), r); carrier.setOwner(p); carrier.setPos(p.getEyePosition());
             h.assertTrue(glyph().replace(carrier, CarrierRegistry.of(MethodProjectile.INSTANCE)), "Denied payload still consumes original carrier");
-            h.assertTrue(h.getLevel().getEntitiesOfClass(SpellAbyssalShard.class, area(p)).isEmpty(), "No unaffordable native entity");
+            h.assertTrue(h.getLevel().getEntitiesOfClass(SpellAbyssalShard.class, area(p)).stream().noneMatch(e -> e.getOwner() == p), "No unaffordable native entity for this caster");
             CapabilityRegistry.getMana(p).setMana(1000);
             h.assertTrue(r.onCast(ItemStack.EMPTY, h.getLevel()), "Funded cast launches");
             var primary = shard(h, p); p.discard(); ExecutionSessions.tick();

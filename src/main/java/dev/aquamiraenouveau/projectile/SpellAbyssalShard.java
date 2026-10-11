@@ -5,6 +5,10 @@ import dev.arsconflux.api.projectile.CarrierProxy;
 import dev.obscuria.aquamirae.common.entity.projectile.AbyssalShard;
 import net.minecraft.network.syncher.*;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
@@ -17,6 +21,7 @@ public final class SpellAbyssalShard extends AbyssalShard implements CarrierProx
     private Consumer<HitResult> impact;
     private boolean repeated;
     private boolean resolving;
+    private boolean selectingHomingTarget;
 
     public SpellAbyssalShard(EntityType<? extends SpellAbyssalShard> type, Level world) { super(type, world); }
     public void configure(EntityProjectileSpell carrier, boolean arsDriven, boolean repeated, Consumer<HitResult> impact) {
@@ -29,6 +34,24 @@ public final class SpellAbyssalShard extends AbyssalShard implements CarrierProx
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(ARS_DRIVEN, false);
+    }
+    @Override protected boolean canTargetEntity(Entity entity) {
+        // Slimes and magma cubes implement Enemy but do not extend the native Monster check.
+        return super.canTargetEntity(entity) || entity instanceof Enemy && acceptsContact(entity) && hasLineOfSight(entity);
+    }
+    private boolean acceptsContact(Entity entity) {
+        var owner = getOwner();
+        return entity != owner && entity.canBeHitByProjectile()
+                && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entity)
+                && (owner == null || !owner.isPassengerOfSameVehicle(entity));
+    }
+    @Override protected boolean canHitEntity(Entity entity) {
+        // Native findTarget also uses this predicate. Keep homing selection separate from contact.
+        return selectingHomingTarget ? super.canHitEntity(entity) : acceptsContact(entity);
+    }
+    @Override protected LivingEntity findTarget() {
+        selectingHomingTarget = true;
+        try { return super.findTarget(); } finally { selectingHomingTarget = false; }
     }
     @Override public void tick() {
         if (!level().isClientSide && impact == null) { discard(); return; } // No resolver survives a world reload.
