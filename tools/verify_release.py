@@ -39,7 +39,7 @@ def check(platform):
                         namespace, loc = texture.split(':', 1)
                         assert f'assets/{namespace}/textures/{loc}.png' in native_files, f'Missing native texture: {texture}'
             recipes = [n for n in names if n.startswith('data/aquamirae_nouveau/recipe') and n.endswith('.json')]
-            assert len(recipes) == (4 if platform else 5), f'Wrong recipe count: {path}'
+            assert len(recipes) == (7 if platform else 8), f'Wrong recipe count: {path}'
             for name in recipes:
                 recipe = json.loads(z.read(name))
                 glyph = recipe['output'] if platform else recipe['output']['id']
@@ -60,17 +60,21 @@ def check(platform):
                         assert model['textures']['layer0'] == 'aquamirae:item/' + item, 'Icon and acquisition must use the same native source'
             if platform:
                 assert not any('glyph_abyssal_shard.json' in n for n in names), 'Forge exposes unsupported shard'
-                assert not any('/mixin/' in n or n == 'aquamirae_nouveau.mixins.json' for n in names), 'Forge ships Neo-only hooks'
-            elif path == binary:
-                metadata = tomllib.loads(z.read('META-INF/neoforge.mods.toml').decode('utf8'))
+                assert not any('SpellAbyssalShard' in n or 'ShardSplitMixin' in n or n == 'aquamirae_nouveau.mixins.json' for n in names), 'Forge ships Neo-only hooks'
+            if path == binary:
+                metadata = tomllib.loads(z.read('META-INF/mods.toml' if platform else 'META-INF/neoforge.mods.toml').decode('utf8'))
                 dependency = next(d for d in metadata['dependencies']['aquamirae_nouveau'] if d['modId'] == 'ars_conflux')
                 assert dependency['versionRange'] == '[0.1.16,0.2)', 'Alliance API requires Core 0.1.16'
-                mixin_file = metadata['mixins'][0]['config']
-                mixins = json.loads(z.read(mixin_file))
-                for hook in mixins['mixins']:
-                    assert mixins['package'].replace('.', '/') + '/' + hook + '.class' in names, 'Missing native/Ars opt-in hook'
-                shard = z.read('dev/aquamiraenouveau/projectile/SpellAbyssalShard.class')
-                assert b'dev/arsconflux/api/targeting/Allies' in shard, 'Missing Core alliance query'
+                configs = ['aquamirae_nouveau_chakram.mixins.json'] if platform else [entry['config'] for entry in metadata['mixins']]
+                for mixin_file in configs:
+                    mixins = json.loads(z.read(mixin_file))
+                    for hook in mixins['mixins']:
+                        assert mixins['package'].replace('.', '/') + '/' + hook + '.class' in names, 'Missing native/Ars opt-in hook'
+                    if platform:
+                        refmap = json.loads(z.read(mixins['refmap']))
+                        assert refmap['mappings'], 'Forge hooks must have runtime mappings'
+                control = z.read('dev/aquamiraenouveau/projectile/ChakramControl.class')
+                assert b'dev/arsconflux/api/targeting/Allies' in control, 'Missing Core alliance query'
         print(f'PASS {path} SHA-256 {hashlib.sha256(path.read_bytes()).hexdigest()}')
 
 if __name__ == '__main__':

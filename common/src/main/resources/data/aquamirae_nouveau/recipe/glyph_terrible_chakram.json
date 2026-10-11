@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "aquamirae_nouveau:glyph_terrible_chakram",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "aquamirae:terrible_chakram"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

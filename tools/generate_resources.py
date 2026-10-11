@@ -19,6 +19,15 @@ GLYPHS = [
     ('abyssal_shard', 'Abyssal Shard', '深渊碎晶', 'dreadwake', 'dreadwake',
      'Replace a projectile with Dreadwake\'s shard, dealing damage and inflicting Weakness on impact. It splits into three smaller shards when broken; Amplify increases damage.',
      '以破晓之惧的碎晶替换弹射物，命中造成伤害并附加虚弱，碎裂时分出三个小碎晶。增强提高伤害。'),
+    ('scyphoid_sting', 'Scyphoid Sting', '水母蜇刺', 'jellyfish_jelly', 'jellyfish_jelly',
+     'Inflict an abyssal scyphoid\'s Poison III and Blindness for three seconds. Amplify strengthens the poison; Extend Time prolongs both effects.',
+     '以深海水母的蜇刺使目标中毒III并失明，持续三秒。增强提高毒性，延时延长持续时间。'),
+    ('terrible_chakram', 'Terrible Chakram', '可怖环刃', 'terrible_chakram', 'terrible_chakram',
+     'Replace a projectile with a returning terrible chakram. It deals damage and poisons targets it passes through, ignoring allies.',
+     '以可怖环刃替换弹射物，穿过目标造成伤害并附加中毒，随后飞回。不会命中友军。'),
+    ('maze_rose', 'Maze Rose', '迷宫玫瑰', 'maze_rose', 'maze_rose',
+     'Replace a projectile with a returning maze rose that tracks monsters. It deals damage and briefly levitates targets, ignoring allies.',
+     '以迷宫玫瑰替换弹射物，追踪怪物，命中造成伤害并短暂浮空，随后飞回。不会锁定或命中友军。'),
 ]
 
 def write(relative, data):
@@ -36,9 +45,12 @@ for lang in ['en_us', 'zh_cn']:
         values['aquamirae_nouveau.description.' + id_] = description
         values['aquamirae_nouveau.glyph_name.glyph_' + id_] = en if lang == 'en_us' else zh
         values['aquamirae_nouveau.glyph_desc.glyph_' + id_] = description
+        if id_ in ('terrible_chakram', 'maze_rose'):
+            values['ars_nouveau.augment_desc.glyph_' + id_ + '_glyph_accelerate'] = 'Increase launch speed.' if lang == 'en_us' else '提高发射速度。'
+            continue
         values['ars_nouveau.augment_desc.glyph_' + id_ + '_glyph_amplify'] = (
-            ('Increase native shard scale and damage.' if id_ == 'abyssal_shard' else 'Add effect levels up to the native limit.') if lang == 'en_us'
-            else ('增加原生碎晶尺寸和伤害。' if id_ == 'abyssal_shard' else '增加效果层数，受原生上限限制。'))
+            ('Increase native shard scale and damage.' if id_ == 'abyssal_shard' else 'Strengthen the poison up to Poison V.' if id_ == 'scyphoid_sting' else 'Add effect levels up to the native limit.') if lang == 'en_us'
+            else ('增加原生碎晶尺寸和伤害。' if id_ == 'abyssal_shard' else '提高毒性，最高中毒V。' if id_ == 'scyphoid_sting' else '增加效果层数，受原生上限限制。'))
         if id_ != 'abyssal_shard':
             values['ars_nouveau.augment_desc.glyph_' + id_ + '_glyph_extend_time'] = 'Extend the effect duration.' if lang == 'en_us' else '延长效果持续时间。'
     write('assets/aquamirae_nouveau/lang/' + lang + '.json', values)

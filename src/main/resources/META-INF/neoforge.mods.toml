@@ -11,6 +11,9 @@ description="Independent Aquamirae integration for Ars Nouveau via Ars Conflux."
 [[mixins]]
 config="aquamirae_nouveau.mixins.json"
 
+[[mixins]]
+config="aquamirae_nouveau_chakram.mixins.json"
+
 [[dependencies.aquamirae_nouveau]]
 modId="minecraft"
 type="required"

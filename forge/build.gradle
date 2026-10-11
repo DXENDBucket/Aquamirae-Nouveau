@@ -27,6 +27,7 @@ minecraft {
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             args '--mixin.config', 'ars_conflux.mixins.json'
+            args '--mixin.config', 'aquamirae_nouveau_chakram.mixins.json'
         }
         client { workingDirectory file('run/client'); mods { ars_conflux { source project(':ars-conflux').sourceSets.main }; aquamirae_nouveau { source sourceSets.main } } }
         server { workingDirectory file('run/server'); args '--nogui'; mods { ars_conflux { source project(':ars-conflux').sourceSets.main }; aquamirae_nouveau { source sourceSets.main } } }
@@ -41,19 +42,33 @@ minecraft {
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.0'
     implementation project(':ars-conflux')
+    compileOnly 'io.github.llamalad7:mixinextras-common:0.4.1'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    annotationProcessor 'io.github.llamalad7:mixinextras-common:0.4.1'
     for (name in ['ars-nouveau', 'curios', 'geckolib', 'patchouli', 'aquamirae', 'fragmentum']) {
         implementation fg.deobf("local:${name}:forge1201")
     }
 }
+mixin { add sourceSets.main, 'aquamirae_nouveau.refmap.json'; config 'aquamirae_nouveau_chakram.mixins.json' }
 def bridges = layout.buildDirectory.dir('generated/bridges')
 def generateConfig = tasks.register('generateConfig') {
     inputs.file '../src/main/java/dev/aquamiraenouveau/platform/AquamiraeConfig.java'
+    inputs.files '../src/main/java/dev/aquamiraenouveau/projectile/SpellTerribleChakram.java',
+            '../src/main/java/dev/aquamiraenouveau/projectile/SpellMazeRose.java', '../src/main/java/dev/aquamiraenouveau/mixin/RoseHomingMixin.java'
     outputs.dir bridges
     doLast {
         def text = file('../src/main/java/dev/aquamiraenouveau/platform/AquamiraeConfig.java').getText('UTF-8')
                 .replace('net.neoforged.neoforge.common.ModConfigSpec', 'net.minecraftforge.common.ForgeConfigSpec').replace('ModConfigSpec', 'ForgeConfigSpec')
         def out = new File(bridges.get().asFile, 'dev/aquamiraenouveau/platform/AquamiraeConfig.java')
         out.parentFile.mkdirs(); out.setText(text, 'UTF-8')
+        for (relative in ['projectile/SpellTerribleChakram.java', 'projectile/SpellMazeRose.java', 'mixin/RoseHomingMixin.java']) {
+            def adapted = file('../src/main/java/dev/aquamiraenouveau/' + relative).getText('UTF-8')
+                    .replace('dev.obscuria.aquamirae.common.entity.projectile.', 'dev.obscuria.aquamirae.common.entity.')
+                    .replace('defineSynchedData(SynchedEntityData.Builder builder)', 'defineSynchedData()')
+                    .replace('super.defineSynchedData(builder); builder.define(', 'super.defineSynchedData(); entityData.define(')
+            def bridge = new File(bridges.get().asFile, 'dev/aquamiraenouveau/' + relative)
+            bridge.parentFile.mkdirs(); bridge.setText(adapted, 'UTF-8')
+        }
     }
 }
 sourceSets.main.java.srcDir bridges
@@ -61,17 +76,20 @@ tasks.named('compileJava') { dependsOn generateConfig }
 tasks.named('sourcesJar') { dependsOn generateConfig }
 def testBridges = layout.buildDirectory.dir('generated/test-bridges')
 def generateTests = tasks.register('generateForgeTests') {
-    inputs.file '../src/gameTest/java/dev/aquamiraenouveau/AbilityGameTests.java'
+    inputs.files '../src/gameTest/java/dev/aquamiraenouveau/AbilityGameTests.java', '../src/gameTest/java/dev/aquamiraenouveau/ChakramGameTests.java'
     outputs.dir testBridges
     doLast {
-        def text = file('../src/gameTest/java/dev/aquamiraenouveau/AbilityGameTests.java').getText('UTF-8')
+      for (name in ['AbilityGameTests.java', 'ChakramGameTests.java']) {
+        def text = file('../src/gameTest/java/dev/aquamiraenouveau/' + name).getText('UTF-8')
                 .replace('template="empty"', 'template="empty", templateNamespace="aquamirae_nouveau"')
                 .replace('net.neoforged.neoforge.gametest', 'net.minecraftforge.gametest')
                 .replace('net.neoforged.neoforge.common.util', 'net.minecraftforge.common.util')
                 .replace('CapabilityRegistry.getMana(p)', 'CapabilityRegistry.getMana(p).orElseThrow(IllegalStateException::new)')
+                .replace('r.getExpendedCost()', 'r.getResolveCost()')
                 .replace('net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE.wrapAsHolder(com.hollingsworth.arsnouveau.api.perk.PerkAttributes.MAX_MANA.get())', 'com.hollingsworth.arsnouveau.api.perk.PerkAttributes.MAX_MANA.get()')
-        def out = new File(testBridges.get().asFile, 'dev/aquamiraenouveau/AbilityGameTests.java')
+        def out = new File(testBridges.get().asFile, 'dev/aquamiraenouveau/' + name)
         out.parentFile.mkdirs(); out.setText(text, 'UTF-8')
+      }
     }
 }
 sourceSets.gameTest.java.srcDir testBridges
@@ -85,6 +103,11 @@ def generateResources = tasks.register('generateForgeResources') {
             def relative = file('../common/src/main/resources').toPath().relativize(source.toPath()).toString().replace('\\', '/')
             if (relative.endsWith('/glyph_abyssal_shard.json')) return
             def text = source.getText('UTF-8')
+            if (relative == 'aquamirae_nouveau_chakram.mixins.json') {
+                def config = new JsonSlurper().parseText(text)
+                config.refmap = 'aquamirae_nouveau.refmap.json'
+                text = JsonOutput.prettyPrint(JsonOutput.toJson(config)) + '\n'
+            }
             if (relative.startsWith('data/aquamirae_nouveau/recipe/')) {
                 def recipe = new JsonSlurper().parseText(text)
                 text = JsonOutput.prettyPrint(JsonOutput.toJson([type: recipe.type, exp: recipe.exp, output: recipe.output.id, count: recipe.output.count, inputItems: recipe.inputs.collect { [item: it] }])) + '\n'
@@ -96,6 +119,7 @@ def generateResources = tasks.register('generateForgeResources') {
     }
 }
 sourceSets.main.resources.srcDir resources
+tasks.named('sourcesJar') { dependsOn generateResources }
 tasks.named('processResources') {
     dependsOn generateResources
     inputs.property 'version', project.version
@@ -105,6 +129,7 @@ tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
 tasks.named('jar') {
     from('../LICENSE', '../THIRD_PARTY_NOTICES.md')
     archiveFileName = "aquamirae-nouveau-${project.version}-mc1.20.1-forge.jar"
+    manifest { attributes 'MixinConfigs': 'aquamirae_nouveau_chakram.mixins.json' }
     finalizedBy 'reobfJar'
 }
 tasks.named('sourcesJar') { from('../LICENSE', '../THIRD_PARTY_NOTICES.md') }

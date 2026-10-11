@@ -3,6 +3,6 @@
   "minVersion": "0.8",
   "package": "dev.aquamiraenouveau.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": ["ShardSplitMixin", "ShardCarrierMixin"],
+  "mixins": ["ShardSplitMixin"],
   "injectors": {"defaultRequire": 1}
 }

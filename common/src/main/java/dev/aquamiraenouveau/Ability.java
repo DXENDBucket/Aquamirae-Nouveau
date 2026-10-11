@@ -5,7 +5,10 @@ public enum Ability {
     HEALTH_SHATTER("health_shatter", "Health Shatter", 60, 240, 10, true, 3),
     DEPTHS_FURY("fury_of_the_depths", "Fury of the Depths", 60, 600, 5, false, 5),
     DEPTHS_RESILIENCE("resilience_of_the_depths", "Resilience of the Depths", 60, 600, 5, false, 5),
-    ABYSSAL_SHARD("abyssal_shard", "Abyssal Shard", 80, 0, 1, false, 2);
+    ABYSSAL_SHARD("abyssal_shard", "Abyssal Shard", 80, 0, 1, false, 2),
+    SCYPHOID_STING("scyphoid_sting", "Scyphoid Sting", 40, 60, 5, false, 3),
+    TERRIBLE_CHAKRAM("terrible_chakram", "Terrible Chakram", 60, 0, 1, false, 3),
+    MAZE_ROSE("maze_rose", "Maze Rose", 70, 0, 1, false, 3);
 
     public final String id, name;
     public final int mana, duration, maxLevel, cooldownSeconds;

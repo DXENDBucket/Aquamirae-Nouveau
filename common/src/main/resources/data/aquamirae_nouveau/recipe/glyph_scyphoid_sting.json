@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "aquamirae_nouveau:glyph_scyphoid_sting",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "aquamirae:jellyfish_jelly"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

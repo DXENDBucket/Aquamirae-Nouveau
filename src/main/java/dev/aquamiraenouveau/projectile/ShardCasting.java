@@ -52,7 +52,7 @@ public final class ShardCasting {
         @Override public boolean start(ExecutionSession<SpellAbyssalShard> session) {
             shard.configure(carrier, trajectory != null, repeated, hit -> impact(session, hit));
             if (trajectory != null) {
-                ShardCarriers.attach(carrier, shard);
+                AlliedCarriers.attach(carrier, session.caster());
                 return trajectory.start(session.world(), () -> {}, hit -> impact(session, hit));
             }
             shard.setPos(carrier.position());
@@ -76,7 +76,7 @@ public final class ShardCasting {
         }
         @Override public void close(ExecutionSession<SpellAbyssalShard> session, ExecutionSession.EndReason reason) {
             shard.detach();
-            ShardCarriers.detach(carrier);
+            AlliedCarriers.detach(carrier);
             if (trajectory != null) trajectory.close();
             else { shard.discard(); carrier.discard(); }
         }

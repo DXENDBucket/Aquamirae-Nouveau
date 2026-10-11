@@ -11,7 +11,11 @@ import net.minecraft.world.entity.LivingEntity;
 public final class NativeAbilities {
     public static boolean supports(Ability ability) { return ability != Ability.ABYSSAL_SHARD; }
     public static com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart glyph(Ability ability) {
-        return new dev.aquamiraenouveau.AquamiraeGlyph(ability);
+        return switch (ability) {
+            case TERRIBLE_CHAKRAM, MAZE_ROSE -> new dev.aquamiraenouveau.projectile.ChakramGlyph(ability);
+            case SCYPHOID_STING -> new dev.aquamiraenouveau.ScyphoidStingGlyph();
+            default -> new dev.aquamiraenouveau.AquamiraeGlyph(ability);
+        };
     }
     public static MobEffect effect(Ability ability) {
         var id = CarrierRegistry.id("aquamirae:" + ability.id);

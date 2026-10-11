@@ -32,7 +32,7 @@ side="BOTH"
 [[dependencies.aquamirae_nouveau]]
 modId="ars_conflux"
 mandatory=true
-versionRange="[0.1.15,0.2)"
+versionRange="[0.1.16,0.2)"
 ordering="AFTER"
 side="BOTH"
 

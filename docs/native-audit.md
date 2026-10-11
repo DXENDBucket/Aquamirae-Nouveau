@@ -1,4 +1,4 @@
-# 首批原生能力核对
+# 原生能力核对
 
 开发基线：NeoForge Aquamirae 7.2.11 / Forge 7.1.14，Fragmentum 5.2.0。
 检查的是发行 JAR 实际字节码，辅助源代码 https://github.com/ObscuriaLithium/Aquamirae 的 1.21.1 分支不能代替发行版。
@@ -47,14 +47,36 @@ dev.4 补充：附属主碎晶及三个半尺寸子碎晶通过 Conflux 0.1.16 �
 
 NeoForge 本体 HookLivingEntity 按 affected_by_depths_fury / affected_by_depths_resilience 标签筛选最终战斗规则，发行数据默认引用 ice_maze_creatures。深海之怒改善对该标签生物的本体伤害倍率，并供武器能力计算；深海之韧在该标签攻击者造成的伤害中改善有效护甲，并降低本体暴击概率与倍率。不能将 +10% 属性写成所有伤害提高 10% 或统一减伤 10%。
 
-所有五个配方仍用原生抄写台：来源物品 ×1、魔源宝石 ×1、27 XP；包含武器的来源物品会被正常消耗。模型只运行时引用同一来源物品纹理，没有复制资源。
+所有配方仍用原生抄写台：来源物品 ×1、魔源宝石 ×1、27 XP；包含武器的来源物品会被正常消耗。模型只运行时引用同一来源物品纹理，没有复制资源。
+
+## 双版水母蜇刺与回旋镖（dev.5）
+
+再次反编译两版实际发布 JAR 中的 AquamiraeHelper、AbyssalScyphoid、AbstractChakram、TerribleChakram、MazeRose，并核对实体注册、物品、掉落表及客户端 renderer。CFR 0.152 输出位于忽略的 `.upstream/dev5-neo/` 和 `.upstream/dev5-forge/`，没有打包或复制原生实现。
+
+| 魔符 | 原生入口与行为 | 图标／抄写材料 |
+| --- | --- | --- |
+| 水母蜇刺 | AbyssalScyphoid 接触攻击：doPoison 60 tick / amplifier 2，失明 60 tick / 0，SQUID_SQUIRT 声音 | 深海水母实际掉落水母果冻 jellyfish_jelly |
+| 可怖环刃 | TerribleChakram，原生 3 点伤害；成功 hurt 后中毒 I / 60 tick | terrible_chakram |
+| 迷宫玫瑰 | MazeRose，原生 3 点伤害；成功 hurt 后浮空 I / 10 tick 与原生声音 | maze_rose |
+
+水母毒素调用两版公开的 `AquamiraeHelper.doPoison`，它排除创造／旁观玩家、添加中毒并设置 lastHurtByMob。水母原生入口另排除 AbyssalScyphoid 与 Anglerfish；附属保留这些豁免，并补接失明和声音，不生成隐形水母。助手对接受施加的生物返回 true，即使原生 addEffect 未改变效果；计费遵循这个返回值。中毒默认 III，增强最高 V，延时同时延长两个状态；没有额外直接伤害。通过 Allies.areAllies 排除原施法者的友军。
+
+回旋镖两版类包名不同（Neo 为 common.entity.projectile，Forge 为 common.entity），但本批所用原生算法一致。共同基类调用 ProjectileUtil 碰撞，再 applyMovement(computeMovement)；不在命中后销毁，允许穿透。原生排除所有者并检查所有者视线。5 tick 后逐渐飞回所有者，回转时长分别 20 / 40 tick，靠近所有者 1 格时移除。原生没有统一最长存活期。
+
+附属只继承完整原生类，通过短小的控制接线补入执行会话与 Ars 续接。两版实体注册均保留原生 1.2 × 0.6 碰撞尺寸和 64 追踪范围，更新间隔设为 1 tick 配合受控轨迹同步。普通飞行最多 120 tick；Ars 受控形态使用 ArsTrajectory，依载体时长并限制 1200 tick，两端停用原生驱动。同步模式字段，客户端注册原生泛型 renderer；没有复制模型、贴图、动画或声音。Forge 的实体同步字段写法由构建生成桥接，公共控制与魔符逻辑放 common/。
+
+迷宫玫瑰原生私有 computeMonsterHoming 仅查询 10 格膨胀包围盒内的 Monster，选择最近候选并按原生时间变化调整运动。专用 Mixin 只对实现 ChakramPayload 且配置控制器的附属实体过滤友军与已死亡候选；普通 MazeRose 返回原候选列表。没有重写追踪算法或把史莱姆加入原生候选，史莱姆仍可直接命中。所有新载荷和受控 Ars 载体均用 Conflux 原施法者友军判断。
+
+普通回旋镖成功生成时扣一次载荷费，穿透伤害不再扣费；重复形态只在原生 hurt 成功时结算并续接。受无敌帧拒绝的伤害不付费、不续接、不销毁武器。方块接触保留原生处理，不续接 Ars。仅支持加速，未把原生武器伤害或短状态包装成可增强数值。区块未加载、原施法者失效、到期、取消或重新加载缺失上下文时移除，不跨存档持有 resolver。
+
+旧 ShardCarriers／ShardCarrierMixin 合并为 shared AlliedCarriers／AlliedCarrierMixin，登记只涉及本附属受控载体，普通 Ars 不受影响。Forge 两个钩子的 Minecraft 调用按 refmap 映射到 SRG；发行检查同时核对钩子类、refmap 与最低 Core 0.1.16。
 
 ## 暂未接入的已知差异
 
 - Forge 7.1.14 `CrystallizationEffect.removeAttributeModifiers` 在原生效果结束时造成 `999999.0f` 点 crystallization 伤害；NeoForge 7.2.11 对应效果仅注册攻击伤害/速度修饰。无法视为同一个普通双版减益，本批不提供结晶化魔符。
 - NeoForge 7.2.11 `PoisonImmunityEffect.applyEffectTick` 返回 `entity.removeEffect(POISON)`。没有毒素时返回 false，Minecraft 1.21.1 的效果更新会移除该效果；Forge 的对应 tick 方法无返回值。未宣称两版具有相同持续免疫行为，本批不提供该魔符或修补原生效果。
 - DevouringCurse 是针对玩家食物/饥饿伤害的特殊本体机制；本批不将其伪装成通用生物持续伤害。
-- 回旋镖的实体路径两版不同，而且原生没有通用最大生存期；在完整处理所有者失效与跨维度清理前，不在首批接入。
+- 首批暂缓的回旋镖已在 dev.5 接入；两版路径差异与最大生存期由上述平台桥接和执行会话处理。
 
 ## 许可和边界
 
