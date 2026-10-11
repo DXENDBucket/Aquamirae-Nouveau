@@ -1,5 +1,7 @@
 # Aquamirae & Nouveau 首批交接
 
+> 本文件为 0.1.0-dev.1 历史记录。当前弹射物替换、来源配方与交付见 [dev.2 交接](handoff-dev2.md)。
+
 ## 范围
 
 - 用户目标：开发海灵物语附属，NeoForge 1.21.1 与 Forge 1.20.1；显示名称 **Aquamirae & Nouveau**。

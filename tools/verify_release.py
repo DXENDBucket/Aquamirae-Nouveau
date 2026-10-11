@@ -13,6 +13,11 @@ def check(platform):
         path = base / 'libs' / entry['file']
         assert hashlib.sha256(path.read_bytes()).hexdigest() == entry['sha256'], f'Dependency drift: {path}'
     native_path = base / 'libs' / ('aquamirae-forge1201.jar' if platform else 'aquamirae.jar')
+    ars_path = base / 'libs' / ('ars-nouveau-forge1201.jar' if platform else 'ars.jar')
+    with zipfile.ZipFile(ars_path) as ars:
+        # Read the actual API's translation contract, rather than checking only our JSON syntax.
+        api = ars.read('com/hollingsworth/arsnouveau/api/spell/AbstractSpellPart.class')
+        assert b'.glyph_name.' in api and b'.glyph_desc.' in api, 'Ars translation contract changed'
     with zipfile.ZipFile(native_path) as native:
         native_files = set(native.namelist())
         native_lang = json.loads(native.read('assets/aquamirae/lang/en_us.json'))
@@ -36,6 +41,13 @@ def check(platform):
             assert len(recipes) == (4 if platform else 5), f'Wrong recipe count: {path}'
             for name in recipes:
                 recipe = json.loads(z.read(name))
+                glyph = recipe['output'] if platform else recipe['output']['id']
+                _, glyph_id = glyph.split(':', 1)
+                for language in ['en_us', 'zh_cn']:
+                    lang = json.loads(z.read(f'assets/aquamirae_nouveau/lang/{language}.json'))
+                    for kind in ['glyph_name', 'glyph_desc']:
+                        key = f'aquamirae_nouveau.{kind}.{glyph_id}'
+                        assert lang.get(key, '').strip(), f'Missing spellbook translation: {key} ({language})'
                 assert recipe['type'] == 'ars_nouveau:glyph' and recipe['exp'] == 27
                 inputs = recipe['inputItems'] if platform else recipe['inputs']
                 assert len(inputs) == 2
@@ -43,6 +55,8 @@ def check(platform):
                     namespace, item = (ingredient['item']['item'] if platform else ingredient['item']).split(':', 1)
                     if namespace == 'aquamirae':
                         assert f'item.aquamirae.{item}' in native_lang, f'Missing native recipe item: {item}'
+                        model = json.loads(z.read(f'assets/aquamirae_nouveau/models/item/{glyph_id}.json'))
+                        assert model['textures']['layer0'] == 'aquamirae:item/' + item, 'Icon and acquisition must use the same native source'
             if platform:
                 assert not any('glyph_abyssal_shard.json' in n for n in names), 'Forge exposes unsupported shard'
         print(f'PASS {path} SHA-256 {hashlib.sha256(path.read_bytes()).hexdigest()}')

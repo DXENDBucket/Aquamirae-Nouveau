@@ -19,7 +19,7 @@ public final class AquamiraeCooldowns implements ActiveCastProvider {
     private static EnumSet<Ability> used(List<Spell> spells) {
         var abilities = EnumSet.noneOf(Ability.class);
         for (var spell : spells) for (var part : ArsSpellAccess.parts(spell))
-            if (part instanceof AquamiraeGlyph glyph) abilities.add(glyph.ability);
+            if (part instanceof AquamiraeSpell glyph) abilities.add(glyph.ability());
         return abilities;
     }
     private static boolean applies(LivingEntity actor) {

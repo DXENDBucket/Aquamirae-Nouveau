@@ -14,8 +14,19 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public final class AquamiraeNouveau {
     public static final String MOD_ID = "aquamirae_nouveau";
     public AquamiraeNouveau(IEventBus bus, ModContainer container) {
+        dev.aquamiraenouveau.projectile.ShardEntities.TYPES.register(bus);
         container.registerConfig(ModConfig.Type.SERVER, AquamiraeConfig.SPEC);
         GlyphCatalog.register();
+        bus.addListener((net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent event) -> event.enqueueWork(() -> {
+            var shard = GlyphCatalog.ALL.stream().filter(dev.aquamiraenouveau.projectile.AbyssalShardGlyph.class::isInstance)
+                    .map(dev.aquamiraenouveau.projectile.AbyssalShardGlyph.class::cast).findFirst().orElseThrow();
+            for (var profile : dev.arsconflux.api.projectile.CarrierRegistry.profiles()) {
+                var form = profile.glyph();
+                if (form == null) continue;
+                profile.rememberOriginalAugments(form);
+                form.compatibleAugments.add(shard);
+            }
+        }));
         var tabs = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
         tabs.register("glyphs", () -> CreativeModeTab.builder()
                 .title(Component.translatable("itemGroup.aquamirae_nouveau"))

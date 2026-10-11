@@ -57,7 +57,8 @@ public final class AbilityGameTests {
         return mob;
     }
     private static AquamiraeGlyph glyph(Ability ability) {
-        return GlyphCatalog.ALL.stream().filter(g -> g.ability == ability).findFirst().orElseThrow();
+        return GlyphCatalog.ALL.stream().filter(g -> g instanceof AquamiraeGlyph effect && effect.ability == ability)
+                .map(AquamiraeGlyph.class::cast).findFirst().orElseThrow();
     }
     private static SpellResolver resolve(GameTestHelper h, ServerPlayer payer, Spell spell, HitResult hit) {
         var context = new SpellContext(h.getLevel(), spell, payer, LivingCaster.from(payer), ItemStack.EMPTY);
@@ -178,7 +179,7 @@ public final class AbilityGameTests {
     @GameTest(template="empty", batch="aqua_recipe", timeoutTicks=40)
     public static void registeredRecipesUseNativeMaterials(GameTestHelper h) {
         for (var g : GlyphCatalog.ALL) {
-            var key = dev.arsconflux.api.projectile.CarrierRegistry.id("aquamirae_nouveau:glyph_" + g.ability.id);
+            var key = g.getRegistryName();
             h.assertTrue(h.getLevel().getRecipeManager().byKey(key).isPresent(), "Native glyph recipe loads: " + key);
             h.assertTrue(!g.getGlyph().getDefaultInstance().isEmpty(), "Glyph item exists: " + key);
         }

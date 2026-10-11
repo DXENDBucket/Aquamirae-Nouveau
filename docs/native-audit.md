@@ -19,15 +19,33 @@
 ## NeoForge 原生深渊碎晶
 
 实际 JAR 中的 `common.entity.projectile.AbyssalShard`、`AbstractShard` 与 `AbstractHomingShard` 核对了构造参数、SCALE / HOMING_STRENGTH 同步数据、原生运动和命中方法、持久化字段及原生渲染器。
-直接实例化注册的原生 EntityType，完整运行其 tick；没有隐藏 Boss、重写实体代码、复制渲染器或重复驱动位置。
+dev.2 使用附属注册的 SpellAbyssalShard 子类，继承本体完整载荷，并直接使用本体 AbyssalShardRenderer。普通本体 EntityType 和实现不修改，没有隐藏 Boss、复制渲染器或重复驱动位置。
 
 - owner 为 Conflux CastContext.damageOwner，目标不转移归属；生成前要求所有者仍活着且处于执行世界。
 - 原生追踪距离 16，针对 Monster 或正攻击所有者的 Mob；原生视线检测与创造/旁观者排除保持。
 - 速度 0.8 是附属发射参数；每个增强增加 0.2 原生尺寸，上限 2。伤害直接走原生 `10 * scale`，虚弱 I 持续 50 tick。
 - 尺寸大于 0.75 的碎晶破裂时生成三个尺寸 0.5 的原生子碎晶；子碎晶保持所有者，不再分裂。全程本体声音、物品粒子和 renderer，图像效果仍需客户端人工验证。
-- 每个原生碎晶最大生存期 200 tick；继承原生保存/读取和区块卸载行为，不持有外部实体引用。死亡的所有者不会使已发出的原生碎晶提前取消。
-- 发射是一个 Ars 效果，后续魔符保持原触发位置；不提供子碎晶 Ars 命中续接。散射、环绕等只会在各次实际触发产生各自付费的原生实体。
+- 普通飞行碎晶原生最大生存期 200 tick；Ars 受控形态依其载体时长，上限 1200 tick。执行会话在所有者失效、空蓝、未加载区块等情况清理附属载荷；原生分裂子碎晶保留自己的 200 tick 生命周期。
+- dev.2 是 Conflux ProjectileForm 替换增强。主碎晶命中续接 Ars 效果，子碎晶只保留原生伤害与虚弱。普通弹射物使用原生追踪运动；环绕等受控形态使用 ArsTrajectory，实体自身两端停止原生运动/碰撞。重复载体保留自身且按命中扣费，不在命中时分裂。
 - Forge 7.1.14 的完整类清单没有 AbyssalShard / AbstractShard / AbstractHomingShard。未自行移植或伪装成双版功能。
+
+## 明确来源与获取（dev.2 补核）
+
+补核两版实际发布 JAR 的 AquamiraeItems 注册和 NeoForge DreadwakeTier2Ability 字节码。反编译结果位于忽略的 .upstream/feedback-decompiled/；GitHub 源码只辅助阅读。
+
+| 能力 | 原生来源 | 附属图标和抄写材料 |
+| --- | --- | --- |
+| 护甲碎裂 | ShatterspikeBaseAbility 命中叠层 | 裂解尖刺 shatterspike |
+| 生命碎裂 | ShatterbladeBaseAbility 命中叠层 | 裂解之刃 shatterblade |
+| 深海之怒 | 原生食品效果 | 鮟鱇鱼精华 esca |
+| 深海之韧 | 原生食品效果 | 熟棘鱼 cooked_spinefish |
+| 深渊碎晶 | 破晓之惧 DreadwakeTier2Ability：击杀后发出三个原生碎晶 | 破晓之惧 dreadwake，仅 NeoForge |
+
+两版实际食品注册：esca 深海之怒 I/3600 tick；esca_skewer III/9600 tick；cooked_spinefish 深海之韧 II/3600 tick；sea_casserole III/9600 tick；sea_stew III/6000 tick；poseidon_breakfast 同时深海之怒 IV、深海之韧 IV/12000 tick。buff 的附属默认 30 秒是魔符参数，不是原料理时长。
+
+NeoForge 本体 HookLivingEntity 按 affected_by_depths_fury / affected_by_depths_resilience 标签筛选最终战斗规则，发行数据默认引用 ice_maze_creatures。深海之怒改善对该标签生物的本体伤害倍率，并供武器能力计算；深海之韧在该标签攻击者造成的伤害中改善有效护甲，并降低本体暴击概率与倍率。不能将 +10% 属性写成所有伤害提高 10% 或统一减伤 10%。
+
+所有五个配方仍用原生抄写台：来源物品 ×1、魔源宝石 ×1、27 XP；包含武器的来源物品会被正常消耗。模型只运行时引用同一来源物品纹理，没有复制资源。
 
 ## 暂未接入的已知差异
 
