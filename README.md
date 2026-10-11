@@ -2,7 +2,7 @@
 
 独立的海灵物语与 Ars Nouveau 联动附属，使用 Ars Conflux 中立 API。
 显示名称：**Aquamirae & Nouveau**；Mod ID：`aquamirae_nouveau`；作者 EndXiom；附属代码许可 MIT。
-当前版本 **0.1.0-dev.7**。原模组由 Obscuria 开发；本项目不代表其官方，也不打包原模组代码或素材。
+当前版本 **0.1.0-dev.8**。原模组由 Obscuria 开发；本项目不代表其官方，也不打包原模组代码或素材。
 
 | 平台 | Java | 原模组验证基线 | Ars 验证基线 |
 | --- | --- | --- | --- |
@@ -28,7 +28,7 @@
 | 吸血咬击 | 两版 | 70 | 3 秒 | 基础伤害 8、中毒 III／5 秒，按实际掉血两倍为伤害所有者回血 |
 | 船长旋流 | 两版 | 80，续费 8／秒 | 10 秒 | 给自己或友军 10 秒旋流，牵动附近最大生命不超过 100 的敌人，结束时向外推 |
 
-五个状态魔符、两个碎裂迸裂魔符和三项生物能力属于 **效果**；深渊碎晶、可怖环刃、迷宫玫瑰属于弹射物替换 **增强**，紧随弹射物形态书写。三项生物能力为 Tier 2，其他为 Tier 1。原版 Ars 形态和增强的费用仍由 Ars 收取。
+五个状态魔符、两个碎裂迸裂魔符和三项生物能力属于 **效果**；深渊碎晶、可怖环刃、迷宫玫瑰属于弹射物替换 **增强**，紧随弹射物形态书写。所有魔符默认等级统一为 Tier 1。原版 Ars 形态和增强的费用仍由 Ars 收取。
 状态魔符每个成功触发单独支付上述载荷费用；每个书写增强额外支付 10 Mana。
 原有四个状态魔符在原生效果未改变时不支付载荷费用。水母蜇刺按原生毒素助手接受施加计费；没有适用实体、友军、空蓝或载荷生成失败时不支付载荷费用。创造模式免载荷费。普通替换弹射物按成功生成计费，重复载体按有效命中计费。
 形态与后续效果仍遵循原生 Ars 行为；不将选中的实体变成施法者、伤害所有者或付款者。
@@ -98,4 +98,4 @@ Forge `jar` 会执行 `reobfJar`；只使用重混淆后的最终 JAR。两版�
 根目录 `python tools/verify_release.py` 验证 NeoForge 产物，加 `--forge` 验证 Forge 产物。
 `tools/generate_resources.py` 维护共享的中英文本、NeoForge 配方和贴图引用；Forge 构建转换为 Ars 4 的配方格式。
 
-本体差异和未接入能力见 [原生行为核对](docs/native-audit.md)，当前验证与产物见 [dev.7 交接](docs/handoff-dev7.md)，[dev.6 交接](docs/handoff-dev6.md)、[dev.5 交接](docs/handoff-dev5.md)、[dev.4 交接](docs/handoff-dev4.md)、[dev.3 交接](docs/handoff-dev3.md)、[dev.2 交接](docs/handoff-dev2.md)和[首批交接](docs/handoff-first-abilities.md)保留历史记录。
+本体差异和未接入能力见 [原生行为核对](docs/native-audit.md)，当前验证与产物见 [dev.8 交接](docs/handoff-dev8.md)，[dev.7 交接](docs/handoff-dev7.md)、[dev.6 交接](docs/handoff-dev6.md)、[dev.5 交接](docs/handoff-dev5.md)、[dev.4 交接](docs/handoff-dev4.md)、[dev.3 交接](docs/handoff-dev3.md)、[dev.2 交接](docs/handoff-dev2.md)和[首批交接](docs/handoff-first-abilities.md)保留历史记录。

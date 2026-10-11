@@ -52,7 +52,7 @@ public final class EelBiteGlyph extends AbstractEffect implements TriggerPaidGly
     @Override public ResourceCharge firstCharge(SpellContext context, List<AbstractAugment> augments) { return AquamiraeCosts.quote(context, ability(), augments); }
     @Override public int getDefaultManaCost() { return 0; }
     @Override public int getCastingCost() { return 0; }
-    @Override public SpellTier defaultTier() { return SpellTier.TWO; }
+    @Override public SpellTier defaultTier() { return SpellTier.ONE; }
     @Override protected Set<AbstractAugment> getCompatibleAugments() { return Set.of(AugmentAmplify.INSTANCE, AugmentExtendTime.INSTANCE); }
     @Override public String getBookDescription() { return Component.translatable("aquamirae_nouveau.glyph_desc.glyph_eel_bite").getString(); }
     // Ars 5 calls this hook; Ars 4 has no equivalent method.
