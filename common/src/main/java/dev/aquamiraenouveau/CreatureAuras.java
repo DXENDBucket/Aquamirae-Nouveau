@@ -33,8 +33,14 @@ public final class CreatureAuras {
                 && host.isAlive() && !host.isRemoved() && !host.isSpectator() && host.level() == world
                 && world.hasChunkAt(host.blockPosition()) && Allies.areAllies(caster, host);
     }
-    public static boolean start(ServerLevel world, CastContext frame, LivingEntity host, Parameters params,
+    public static int remainingForCaster(LivingEntity caster, Ability ability) {
+        return ACTIVE.values().stream().filter(s -> s.active() && s.caster() == caster && s.parameters().ability() == ability)
+                .mapToInt(ExecutionSession::remainingTicks).max().orElse(0);
+    }
+    public static boolean start(ServerLevel world, CastContext frame, LivingEntity host, Parameters requested,
                                 ResourceCharge charge, BooleanSupplier enabled) {
+        if (!requested.ability().isAura()) return false;
+        var params = new Parameters(requested.ability(), Math.min(requested.ticks(), AquamiraeConfig.maxAuraTicks(requested.ability())), requested.range(), requested.healthLimit());
         var key = new Key(host.getUUID(), params.ability());
         if (params.ticks() <= 0 || !eligible(world, frame.caster(), host) || ACTIVE.containsKey(key)) return false;
         var driver = new ExecutionDriver<Parameters>() {
@@ -43,6 +49,7 @@ public final class CreatureAuras {
                 // Keep the marker through the final server tick so entity tick order cannot swallow ejection.
                 if (!AuraEffects.apply(host, params.ability(), params.ticks() + 1, frame.caster())) return false;
                 ACTIVE.put(key, session); lastTick = world.getGameTime();
+                AquamiraeCooldowns.granted(frame.caster(), params.ability());
                 world.playSound(null, host, params.ability() == Ability.EEL_ROAR ? AquamiraeSounds.ENTITY_EEL_ROAR
                         : AquamiraeSounds.ENTITY_CAPTAIN_CORNELIA_RAGE, SoundSource.PLAYERS, 1, 1);
                 pulse(world, frame, host, params, false);
@@ -62,7 +69,10 @@ public final class CreatureAuras {
                 lastTick = now; return false;
             }
             public void close(ExecutionSession<Parameters> session, ExecutionSession.EndReason reason) {
-                if (ACTIVE.remove(key, session)) AuraEffects.remove(host, params.ability());
+                if (ACTIVE.remove(key, session)) {
+                    AuraEffects.remove(host, params.ability());
+                    AquamiraeCooldowns.ended(frame.caster(), params.ability());
+                }
             }
         };
         var session = new ExecutionSession<>(world, frame.withExecutor(host), params, params.ticks(), driver, ignored -> {},
@@ -74,6 +84,9 @@ public final class CreatureAuras {
     }
     public static void clearOrphans(LivingEntity host) {
         for (var ability : new Ability[]{Ability.EEL_ROAR, Ability.CORNELIA_VORTEX}) {
+            for (var source : java.util.List.copyOf(ACTIVE.values()))
+                if (source.caster().getUUID().equals(host.getUUID()) && (source.caster() != host || source.originWorld() != host.level()))
+                    source.finish(ExecutionSession.EndReason.OWNER_GONE);
             var session = ACTIVE.get(new Key(host.getUUID(), ability));
             if (session != null && session.active() && session.context().executor() == host && session.world() == host.level()) continue;
             if (session != null) session.finish(ExecutionSession.EndReason.OWNER_GONE);

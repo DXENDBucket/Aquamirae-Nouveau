@@ -9,6 +9,9 @@ import net.minecraft.world.entity.LivingEntity;
 
 /** Forge 7.1.14 has no native AbyssalShard. It is neither linked nor registered here. */
 public final class NativeAbilities {
+    // Ars 4 has no per-carrier augment descriptions; the glyph's own book description remains available.
+    public static void describeReplacement(com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart carrier,
+                                           com.hollingsworth.arsnouveau.api.spell.AbstractAugment replacement) {}
     public static boolean supports(Ability ability) { return ability != Ability.ABYSSAL_SHARD; }
     public static com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart glyph(Ability ability) {
         return switch (ability) {

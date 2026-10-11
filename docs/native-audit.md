@@ -176,6 +176,12 @@ ShipbreakerEvent 虽由船长 rage 触发，但两版的唱片机钩子也会在
 
 完整动作没有独立原生施法入口，因此 CreatureAuras／EelBiteGlyph 是原创玩家适配，复用本体状态、毒素助手、声音与 GHOST 粒子，不复制实体 AI 或动画类。抄写及图标来源分别为鳗鱼掉落的死海卷轴 dead_sea_scroll、锋利骨头 sharp_bones，以及船长必掉的冰冻钥匙 frozen_key；旋流必须消耗该船长掉落物。增益图标通过状态图集别名引用同一物品贴图，没有分发 PNG。验证与最终产物见 [dev.7 交接](handoff-dev7.md)；服务端验证不等于客户端外观验证。
 
+## dev.9 平衡落地与弹射物复核
+
+用户接受 dev.8 审计的费用、前摇与长冷却调整，并明确拒绝“同一施法者只能有一个控制源”的限制。本版允许多个友军同时承载同项增益，逐份支付初费和续费；同执行者同项的去重保留。咆哮／旋流默认最高 15／20 秒、前摇 13／20 tick，初费 80／120、续费 12／16 每秒、主动 CD 至少 30／45 秒，结束后另保留 20／15 秒主动恢复。既有弹射物命中和续接不受主动 CD 拦截。咬击改为 100／5 秒 CD，迸裂分别 20／15，其他费用见 README。
+
+弹射物原生算法保持不变；本轮再次核对两版回旋镖和 Ars 普通散射、Neo 碎晶。碎晶子晶伤害各 5，一份 Ars Split 增加一发；环刃／玫瑰调至 40／50 Mana，同时修正独立海灵环境下碎晶增强的书内兼容列表。实际伤害、计费模式与验证边界见 [dev.9 弹射物复核](projectile-balance-dev9.md)，验证和产物见 [dev.9 交接](handoff-dev9.md)。不新增本体代码／资源复制，不改 Core。
+
 ## 暂未接入的已知差异
 
 - Forge 7.1.14 `CrystallizationEffect.removeAttributeModifiers` 在原生效果移除时直接造成 `999999.0f` 点 crystallization 伤害。补核 NeoForge 7.2.11 的完整调用链：`MixinLivingEntity.onEffectRemoved` → `HookLivingEntity.onEffectRemoved` → `ServerLevelHelper.triggerEvent` → `CrystallizationEvent.tick`，同样造成 `999999.0f` 点伤害，只是由服务器事件执行。此前仅检查 Neo 效果类、将其视作只有属性修饰的记录不完整。两版都不能作为普通可净化减益接入；死亡延缓候选需核对完整死亡与移除时序。

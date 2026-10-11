@@ -21,18 +21,15 @@ public final class AquamiraeNouveau {
             if (!event.getLevel().isClientSide && event.getEntity() instanceof net.minecraft.world.entity.LivingEntity living)
                 CreatureAuras.clearOrphans(living);
         });
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.entity.player.PlayerEvent.Clone event) ->
+                AquamiraeCooldowns.copyState(event.getOriginal(), event.getEntity()));
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.TickEvent.ServerTickEvent event) -> {
+            if (event.phase == net.minecraftforge.event.TickEvent.Phase.END) AquamiraePreparation.tick();
+        });
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.server.ServerStoppingEvent event) -> AquamiraePreparation.stop());
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, AquamiraeConfig.SPEC);
         GlyphCatalog.register();
-        bus.addListener((net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent event) -> event.enqueueWork(() -> {
-            var replacements = GlyphCatalog.ALL.stream().filter(dev.arsconflux.api.projectile.ProjectileForm.class::isInstance)
-                    .map(com.hollingsworth.arsnouveau.api.spell.AbstractAugment.class::cast).toList();
-            for (var profile : dev.arsconflux.api.projectile.CarrierRegistry.profiles()) {
-                var form = profile.glyph();
-                if (form == null) continue;
-                profile.rememberOriginalAugments(form);
-                form.compatibleAugments.addAll(replacements);
-            }
-        }));
+        bus.addListener((net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent event) -> event.enqueueWork(GlyphCatalog::configureCarriers));
         var tabs = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
         tabs.register("glyphs", () -> CreativeModeTab.builder()
                 .title(Component.translatable("itemGroup.aquamirae_nouveau"))

@@ -34,7 +34,7 @@ public final class CreatureAuraGlyph extends AbstractEffect implements TriggerPa
         if (!CreatureAuras.eligible(world, frame.caster(), host)) return;
         double duration = AquamiraeConfig.duration(ability) + Math.max(0, stats.getDurationMultiplier()) * AquamiraeConfig.extendTicks();
         if (!Double.isFinite(duration) || duration <= 0) return;
-        int ticks = (int)Math.min(72000, duration);
+        int ticks = (int)Math.min(AquamiraeConfig.maxAuraTicks(ability), duration);
         double range = Math.min(32, (ability == Ability.EEL_ROAR ? Math.sqrt(150) : 10) + 2 * bounded(stats.getAoeMultiplier(), 16));
         double healthLimit = 100 + 50 * bounded(stats.getAmpMultiplier(), 18);
         CreatureAuras.start(world, frame, host, new CreatureAuras.Parameters(ability, ticks, range, healthLimit),

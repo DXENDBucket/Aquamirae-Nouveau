@@ -9,6 +9,8 @@ import com.hollingsworth.arsnouveau.common.spell.method.MethodTouch;
 import com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry;
 import dev.arsconflux.api.context.CastContext;
 import dev.arsconflux.api.context.CastContexts;
+import dev.arsconflux.api.casting.ActiveCasts;
+import dev.arsconflux.api.casting.ActiveCastSource;
 import dev.arsconflux.api.execution.ExecutionSessions;
 import dev.arsconflux.api.projectile.CarrierRegistry;
 import dev.arsconflux.api.targeting.Allies;
@@ -51,7 +53,7 @@ public final class CreatureGameTests {
         var parts = new ArrayList<AbstractSpellPart>(); parts.add(MethodTouch.INSTANCE); parts.add(glyph(ability)); parts.addAll(List.of(augments));
         var r = resolver(h, p, new Spell(parts)); r.spellContext.nextPart(); r.onResolveEffect(h.getLevel(), new EntityHitResult(target));
     }
-    private static void cleanup(LivingEntity... entities) { for (var e : entities) e.discard(); ExecutionSessions.tick(); }
+    private static void cleanup(LivingEntity... entities) { for (var e : entities) e.discard(); ExecutionSessions.tick(); ActiveCasts.tick(); AquamiraePreparation.tick(); }
 
     @GameTest(template="empty", batch="aqua_creatures", timeoutTicks=40)
     public static void biteUsesActualLossAndOriginalOwner(GameTestHelper h) {
@@ -63,7 +65,7 @@ public final class CreatureGameTests {
             r.spellContext.nextPart(); r.onResolveEffect(h.getLevel(), new EntityHitResult(victim));
             h.assertTrue(victim.getHealth() == 17 && owner.getHealth() == 8 && p.getHealth() == 20, "Only actual health loss heals the actual owner, excluding absorption: victim=" + victim.getHealth() + ", owner=" + owner.getHealth() + ", caster=" + p.getHealth());
             h.assertTrue(victim.hasEffect(MobEffects.POISON) && victim.getLastHurtByMob() == owner, "Native poison and damage retain owner");
-            h.assertTrue(CapabilityRegistry.getMana(p).getCurrentMana() == 930 && CapabilityRegistry.getMana(owner).getCurrentMana() == 1000, "Original caster pays the bite"); h.succeed();
+            h.assertTrue(CapabilityRegistry.getMana(p).getCurrentMana() == 900 && CapabilityRegistry.getMana(owner).getCurrentMana() == 1000, "Original caster pays the bite"); h.succeed();
         } finally { cleanup(p, owner, victim); }
     }
     @GameTest(template="empty", batch="aqua_creatures", timeoutTicks=40)
@@ -80,7 +82,7 @@ public final class CreatureGameTests {
             victim.setInvulnerable(true); apply(h, p, victim, Ability.EEL_BITE);
             h.assertTrue(p.getHealth() == 2 && CapabilityRegistry.getMana(p).getCurrentMana() == 1000, "Rejected damage cannot heal or charge");
             victim.setInvulnerable(false); victim.setHealth(2); apply(h, p, victim, Ability.EEL_BITE);
-            h.assertTrue(victim.isDeadOrDying() && p.getHealth() == 6 && CapabilityRegistry.getMana(p).getCurrentMana() == 930, "Overkill heals only twice the two remaining health"); h.succeed();
+            h.assertTrue(victim.isDeadOrDying() && p.getHealth() == 6 && CapabilityRegistry.getMana(p).getCurrentMana() == 900, "Overkill heals only twice the two remaining health"); h.succeed();
         } finally { NeoForge.EVENT_BUS.unregister(cancel); cleanup(p, victim); }
     }
     @GameTest(template="empty", batch="aqua_creatures", timeoutTicks=40)
@@ -89,7 +91,7 @@ public final class CreatureGameTests {
         try {
             apply(h, p, victim, Ability.EEL_BITE, AugmentAmplify.INSTANCE, AugmentExtendTime.INSTANCE);
             h.assertTrue(victim.getHealth() == 30 && p.getHealth() == 20, "Amplify adds bite damage, healing is capped at maximum health");
-            h.assertTrue(victim.getEffect(MobEffects.POISON).getDuration() == 300 && CapabilityRegistry.getMana(p).getCurrentMana() == 920, "Extend affects poison, one charge only"); h.succeed();
+            h.assertTrue(victim.getEffect(MobEffects.POISON).getDuration() == 300 && CapabilityRegistry.getMana(p).getCurrentMana() == 890, "Extend affects poison, one charge only"); h.succeed();
         } finally { cleanup(p, victim); }
     }
     @GameTest(template="empty", batch="aqua_creatures", timeoutTicks=60)
@@ -102,10 +104,10 @@ public final class CreatureGameTests {
             h.assertTrue(AuraEffects.has(host, Ability.EEL_ROAR) && !AuraEffects.has(p, Ability.EEL_ROAR), "Selected ally hosts the buff");
             h.assertTrue(enemy.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) && enemy.hasEffect(MobEffects.DARKNESS) && enemy.getDeltaMovement().x > 0 && enemy.getTicksFrozen() > 0, "Facing cone repels and applies native statuses");
             h.assertTrue(!friend.hasEffect(MobEffects.DARKNESS) && !behind.hasEffect(MobEffects.DARKNESS), "Source allies and targets behind the host are excluded");
-            h.assertTrue(CapabilityRegistry.getMana(p).getCurrentMana() == 960, "Caster pays initial quote");
+            h.assertTrue(CapabilityRegistry.getMana(p).getCurrentMana() == 920, "Caster pays initial quote");
             h.runAfterDelay(22, () -> {
                 try {
-                    h.assertTrue(CapabilityRegistry.getMana(p).getCurrentMana() == 956, "Upkeep belongs to original caster");
+                    h.assertTrue(CapabilityRegistry.getMana(p).getCurrentMana() == 908, "Upkeep belongs to original caster");
                     AuraEffects.remove(host, Ability.EEL_ROAR); ExecutionSessions.tick();
                     enemy.removeAllEffects(); enemy.setDeltaMovement(Vec3.ZERO);
                     h.runAfterDelay(3, () -> {
@@ -118,7 +120,7 @@ public final class CreatureGameTests {
     }
     @GameTest(template="empty", batch="aqua_creatures", timeoutTicks=45)
     public static void auraPrepaidSecondExpiresOnEmptyMana(GameTestHelper h) {
-        var p = player(h); CapabilityRegistry.getMana(p).setMana(40);
+        var p = player(h); CapabilityRegistry.getMana(p).setMana(80);
         var enemy = mob(h, p, new Vec3(3, 0, 0), 40);
         apply(h, p, p, Ability.EEL_ROAR);
         h.assertTrue(AuraEffects.has(p, Ability.EEL_ROAR) && enemy.hasEffect(MobEffects.DARKNESS), "The paid first second emits even when it exhausts mana");
@@ -137,7 +139,7 @@ public final class CreatureGameTests {
             AuraEffects.remove(p, Ability.CORNELIA_VORTEX); ExecutionSessions.tick();
             apply(h, p, p, Ability.CORNELIA_VORTEX, AugmentAmplify.INSTANCE, AugmentAOE.INSTANCE, AugmentExtendTime.INSTANCE);
             h.assertTrue(large.getDeltaMovement().lengthSqr() > 0 && outside.getDeltaMovement().lengthSqr() > 0, "Amplify raises cap to 150; AOE reaches outside the original range");
-            h.assertTrue(AuraEffects.remainingTicks(p, Ability.CORNELIA_VORTEX) == 401 && CapabilityRegistry.getMana(p).getCurrentMana() == 830, "Extend doubles the default duration; two initial casts and one Amplify fee"); h.succeed();
+            h.assertTrue(AuraEffects.remainingTicks(p, Ability.CORNELIA_VORTEX) == 401 && CapabilityRegistry.getMana(p).getCurrentMana() == 750, "Extend doubles the default duration; two initial casts and one Amplify fee"); h.succeed();
         } finally { cleanup(p, small, large, outside, friend); }
     }
     @GameTest(template="empty", batch="aqua_creatures", timeoutTicks=45)
@@ -173,5 +175,80 @@ public final class CreatureGameTests {
             h.assertTrue(!AuraEffects.has(reloaded, Ability.EEL_ROAR) && !AuraEffects.has(p, Ability.EEL_ROAR), "A new entity with the same UUID cannot inherit the old execution session");
             reloaded.discard(); h.succeed();
         } finally { cleanup(p, hostileHost); }
+    }
+    @GameTest(template="empty", batch="aqua_creatures", timeoutTicks=60)
+    public static void preparationCanCancelWithoutSpendingThenRelease(GameTestHelper h) {
+        var p = player(h); var spell = new Spell(List.of(MethodSelf.INSTANCE, glyph(Ability.EEL_ROAR)));
+        java.util.function.Supplier<Boolean> cast = () -> resolver(h, p, spell).onCast(ItemStack.EMPTY, h.getLevel());
+        try {
+            ActiveCasts.perform(spell, p, InteractionHand.MAIN_HAND, ActiveCastSource.CASTER_TOOL, cast, false, true);
+            h.assertTrue(ActiveCasts.isChanting(p) && AquamiraePreparation.visible(p), "Aura prepares with a server-owned progress bar");
+            h.assertTrue(CapabilityRegistry.getMana(p).getCurrentMana() == 1000 && AquamiraeCooldowns.remaining(p, Ability.EEL_ROAR) == 0, "Preparation itself neither pays nor starts cooldown");
+            p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(net.minecraft.world.item.Items.PAPER));
+            h.runAfterDelay(2, () -> {
+                try {
+                    h.assertTrue(!ActiveCasts.isChanting(p) && !AquamiraePreparation.visible(p) && CapabilityRegistry.getMana(p).getCurrentMana() == 1000, "Changing the held item cancels preparation and its display without payment");
+                    ActiveCasts.perform(spell, p, InteractionHand.MAIN_HAND, ActiveCastSource.CASTER_TOOL, cast, false, true);
+                    h.runAfterDelay(15, () -> {
+                        try {
+                            h.assertTrue(!ActiveCasts.isChanting(p) && !AquamiraePreparation.visible(p) && AuraEffects.has(p, Ability.EEL_ROAR), "Completed thirteen-tick preparation releases the real Ars spell once");
+                            h.assertTrue(CapabilityRegistry.getMana(p).getCurrentMana() == 910 && AquamiraeCooldowns.remaining(p, Ability.EEL_ROAR) >= 590, "Release pays Self plus the new eighty mana quote and records thirty seconds");
+                            h.succeed();
+                        } finally { cleanup(p); }
+                    });
+                } catch (Throwable e) { cleanup(p); throw e; }
+            });
+        } catch (Throwable e) { cleanup(p); throw e; }
+    }
+    @GameTest(template="empty", batch="aqua_creatures", timeoutTicks=40)
+    public static void mixedAuraPreparationKeepsOneRelease(GameTestHelper h) {
+        var p = player(h); var spell = new Spell(List.of(MethodSelf.INSTANCE, glyph(Ability.EEL_ROAR), glyph(Ability.CORNELIA_VORTEX)));
+        var provider = new AquamiraeCooldowns();
+        try {
+            h.assertTrue(!provider.chantingEnabled(new dev.arsconflux.api.casting.ActiveCastRequest(new Spell(List.of(MethodSelf.INSTANCE, glyph(Ability.DEPTHS_FURY))), p, ActiveCastSource.CASTER_TOOL)), "Ordinary buffs keep immediate casting");
+            ActiveCasts.perform(spell, p, InteractionHand.MAIN_HAND, ActiveCastSource.CASTER_TOOL,
+                    () -> resolver(h, p, spell).onCast(ItemStack.EMPTY, h.getLevel()), false, true);
+            h.runAfterDelay(18, () -> {
+                h.assertTrue(ActiveCasts.isChanting(p) && CapabilityRegistry.getMana(p).getCurrentMana() == 1000, "MAXIMUM aggregation waits for the longer twenty-tick preparation");
+            });
+            h.runAfterDelay(22, () -> {
+                try {
+                    h.assertTrue(AuraEffects.has(p, Ability.EEL_ROAR) && AuraEffects.has(p, Ability.CORNELIA_VORTEX), "One mixed release grants both distinct actions");
+                    h.assertTrue(CapabilityRegistry.getMana(p).getCurrentMana() == 790 && !AquamiraePreparation.visible(p), "One Self price and both payload prices, without repeated preparation"); h.succeed();
+                } finally { cleanup(p); }
+            });
+        } catch (Throwable e) { cleanup(p); throw e; }
+    }
+    @GameTest(template="empty", batch="aqua_creatures", timeoutTicks=40)
+    public static void parallelAuraHostsPayIndependentlyDespiteActiveCooldown(GameTestHelper h) throws Exception {
+        var p = player(h); var first = mob(h, p, new Vec3(3, 0, 0), 40); var second = mob(h, p, new Vec3(6, 0, 0), 40);
+        var relation = Allies.register(CarrierRegistry.id("aquamirae_nouveau:test_parallel_" + p.getUUID()), (a,b) -> a == p && (b == first || b == second));
+        try {
+            apply(h, p, first, Ability.EEL_ROAR); apply(h, p, second, Ability.EEL_ROAR); apply(h, p, first, Ability.EEL_ROAR);
+            h.assertTrue(AuraEffects.has(first, Ability.EEL_ROAR) && AuraEffects.has(second, Ability.EEL_ROAR) && CapabilityRegistry.getMana(p).getCurrentMana() == 840, "Multiple allied hosts are permitted; each pays eighty once, duplicate same-host grants are free");
+            h.assertTrue(!ActiveCasts.allowed(new Spell(List.of(MethodSelf.INSTANCE, glyph(Ability.EEL_ROAR))), p, ActiveCastSource.CASTER_TOOL), "Long cooldown gates new active releases, not these already dispatched grants");
+            h.runAfterDelay(22, () -> {
+                try {
+                    h.assertTrue(CapabilityRegistry.getMana(p).getCurrentMana() == 816, "Both hosts independently prepay twelve mana upkeep");
+                    AuraEffects.remove(first, Ability.EEL_ROAR); ExecutionSessions.tick();
+                    h.assertTrue(AuraEffects.has(second, Ability.EEL_ROAR), "Dispelling one host does not cancel the other"); h.succeed();
+                } finally { cleanup(p, first, second); try { relation.close(); } catch (Exception e) { throw new RuntimeException(e); } }
+            });
+        } catch (Throwable e) { relation.close(); cleanup(p, first, second); throw e; }
+    }
+    @GameTest(template="empty", batch="aqua_creatures", timeoutTicks=40)
+    public static void boundedAuraLifetimeRecoveryAndCloneState(GameTestHelper h) {
+        var p = player(h); var replacement = player(h);
+        try {
+            var five = new AbstractAugment[]{AugmentExtendTime.INSTANCE, AugmentExtendTime.INSTANCE, AugmentExtendTime.INSTANCE, AugmentExtendTime.INSTANCE, AugmentExtendTime.INSTANCE};
+            apply(h, p, p, Ability.EEL_ROAR, five); apply(h, p, p, Ability.CORNELIA_VORTEX, five);
+            h.assertTrue(AuraEffects.remainingTicks(p, Ability.EEL_ROAR) == 301 && AuraEffects.remainingTicks(p, Ability.CORNELIA_VORTEX) == 401, "Even long compositions stop at fifteen and twenty seconds, with the existing final-tick marker guard");
+            var data = p.getPersistentData().getCompound(AquamiraeCooldowns.DATA); data.putLong(Ability.EEL_ROAR.id, 0); data.putLong(Ability.CORNELIA_VORTEX.id, 0);
+            h.assertTrue(AquamiraeCooldowns.remaining(p, Ability.EEL_ROAR) == 700 && AquamiraeCooldowns.remaining(p, Ability.CORNELIA_VORTEX) == 700, "Active auras preserve an end-relative recovery window even if the release deadline has elapsed");
+            AuraEffects.remove(p, Ability.EEL_ROAR); AuraEffects.remove(p, Ability.CORNELIA_VORTEX); ExecutionSessions.tick();
+            h.assertTrue(AquamiraeCooldowns.remaining(p, Ability.EEL_ROAR) == 400 && AquamiraeCooldowns.remaining(p, Ability.CORNELIA_VORTEX) == 300, "Ending actions persists twenty and fifteen seconds of recovery");
+            AquamiraeCooldowns.copyState(p, replacement);
+            h.assertTrue(AquamiraeCooldowns.remaining(replacement, Ability.EEL_ROAR) == 400 && AquamiraeCooldowns.remaining(replacement, Ability.CORNELIA_VORTEX) == 300, "Respawn preserves only this addon's cooldown state"); h.succeed();
+        } finally { cleanup(p, replacement); }
     }
 }

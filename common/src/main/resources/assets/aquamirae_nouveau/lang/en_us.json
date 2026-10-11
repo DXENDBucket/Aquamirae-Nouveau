@@ -1,6 +1,9 @@
 {
   "itemGroup.aquamirae_nouveau": "Aquamirae & Nouveau",
   "aquamirae_nouveau.cooldown": "%s is cooling down (%s s).",
+  "aquamirae_nouveau.preparation": "Preparing sea magic (%s s)",
+  "aquamirae_nouveau.preparation_cancelled": "Preparation interrupted.",
+  "aquamirae_nouveau.validation.amplify": "This projectile has no Amplify effect.",
   "item.aquamirae_nouveau.glyph_armor_shatter": "Armor Shatter",
   "aquamirae_nouveau.name.armor_shatter": "Armor Shatter",
   "aquamirae_nouveau.description.armor_shatter": "Shatter the target's armor, reducing armor by 10% per level. Repeated hits stack up to five levels.",

@@ -9,6 +9,11 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 
 public final class NativeAbilities {
+    public static void describeReplacement(com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart carrier,
+                                           com.hollingsworth.arsnouveau.api.spell.AbstractAugment replacement) {
+        carrier.augmentDescriptions.put(replacement, net.minecraft.network.chat.Component.translatable(
+                "aquamirae_nouveau.glyph_desc." + replacement.getRegistryName().getPath()));
+    }
     public static boolean supports(Ability ability) { return true; }
     public static com.hollingsworth.arsnouveau.api.spell.AbstractSpellPart glyph(Ability ability) {
         return switch (ability) {

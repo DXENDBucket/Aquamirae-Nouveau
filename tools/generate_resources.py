@@ -52,7 +52,10 @@ def write(relative, data):
 
 for lang in ['en_us', 'zh_cn']:
     values = {'itemGroup.aquamirae_nouveau': 'Aquamirae & Nouveau',
-              'aquamirae_nouveau.cooldown': '%s is cooling down (%s s).' if lang == 'en_us' else '%s 冷却中（%s 秒）。'}
+              'aquamirae_nouveau.cooldown': '%s is cooling down (%s s).' if lang == 'en_us' else '%s 冷却中（%s 秒）。',
+              'aquamirae_nouveau.preparation': 'Preparing sea magic (%s s)' if lang == 'en_us' else '海灵法术吟唱（%s 秒）',
+              'aquamirae_nouveau.preparation_cancelled': 'Preparation interrupted.' if lang == 'en_us' else '吟唱已中断。',
+              'aquamirae_nouveau.validation.amplify': 'This projectile has no Amplify effect.' if lang == 'en_us' else '该弹射物不支持增强。'}
     for id_, en, zh, texture, material, desc_en, desc_zh in GLYPHS:
         description = desc_en if lang == 'en_us' else desc_zh
         values['item.aquamirae_nouveau.glyph_' + id_] = en if lang == 'en_us' else zh

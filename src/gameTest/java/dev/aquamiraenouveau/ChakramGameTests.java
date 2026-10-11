@@ -159,14 +159,53 @@ public final class ChakramGameTests {
             h.assertTrue(payload.position().equals(start) && CapabilityRegistry.getMana(p).getCurrentMana() == 1000, "Managed native tick supplies neither extra motion nor spawn payment");
             var hit = new EntityHitResult(cow); var callback = ArsSpellAccess.resolver(carrier);
             callback.onResolveEffect(h.getLevel(), hit); callback.onResolveEffect(h.getLevel(), hit);
-            h.assertTrue(marker.hits == 1 && cow.getHealth() == 97 && CapabilityRegistry.getMana(p).getCurrentMana() == 940,
+            h.assertTrue(marker.hits == 1 && cow.getHealth() == 97 && CapabilityRegistry.getMana(p).getCurrentMana() == 960,
                     "Invulnerability rejection cannot charge or continue a second time");
             cow.invulnerableTime = 0; callback.onResolveEffect(h.getLevel(), hit);
-            h.assertTrue(marker.hits == 2 && CapabilityRegistry.getMana(p).getCurrentMana() == 880, "A second accepted impact bills once");
+            h.assertTrue(marker.hits == 2 && CapabilityRegistry.getMana(p).getCurrentMana() == 920, "A second accepted impact bills once");
             cow.invulnerableTime = 0; CapabilityRegistry.getMana(p).setMana(0); callback.onResolveEffect(h.getLevel(), hit);
             h.assertTrue(payload.isRemoved() && carrier.isRemoved() && marker.hits == 2 && cow.getHealth() == 94, "Denied quote cleans both entities before hurt");
             h.succeed();
         } finally { cow.discard(); cleanup(h, p); }
+    }
+    @GameTest(template="empty", batch="aqua_new", timeoutTicks=40)
+    public static void nativeSweepAndReturnKeepOneSpawnFee(GameTestHelper h) {
+        int fixture = 0;
+        for (var ability : List.of(Ability.TERRIBLE_CHAKRAM, Ability.MAZE_ROSE)) {
+            var p = player(h, 4096 + fixture++ * 48); var first = target(h, p, EntityType.COW, new Vec3(3, 0, 0));
+            var second = target(h, p, EntityType.COW, new Vec3(6, 0, 0)); var marker = new Marker();
+            try {
+                var r = resolver(h, p, new Spell(MethodProjectile.INSTANCE, glyph(ability), marker)); r.castType = MethodProjectile.INSTANCE;
+                var carrier = new EntityProjectileSpell(h.getLevel(), r); carrier.setOwner(p); carrier.setPos(p.getEyePosition());
+                TriggerGeometry.write(r.spellContext, new Vec3(1, 0, 0));
+                glyph(ability).replace(carrier, new CarrierProfile(CarrierRegistry.id("aquamirae_nouveau:sweep_test"), false, false, null, Set::of));
+                var payload = (ChakramPayload)payloads(h, p).get(0); double paid = CapabilityRegistry.getMana(p).getCurrentMana();
+                h.assertTrue(paid == 1000 - ability.mana, "Ordinary native weapon pays its revised launch quote");
+                for (var victim : List.of(first, first, second)) payload.control().onHit(new EntityHitResult(victim), () -> { throw new AssertionError("Native callback must pass through the controller"); });
+                first.invulnerableTime = 0;
+                payload.control().onHit(new EntityHitResult(first), () -> { throw new AssertionError("Return contact uses the controller"); });
+                h.assertTrue(marker.hits == 3 && first.getHealth() == 94 && second.getHealth() == 97, "Two victims and a later return deliver three accepted native contacts; immediate repetition is rejected");
+                h.assertTrue(CapabilityRegistry.getMana(p).getCurrentMana() == paid, "Ordinary sweep and return retain one launch fee despite multiple accepted continuations");
+            } finally { first.discard(); second.discard(); cleanup(h, p); }
+        }
+        h.succeed();
+    }
+    @GameTest(template="empty", batch="aqua_new", timeoutTicks=40)
+    public static void realScatterPaysEachWeaponAndRespectsAvailableMana(GameTestHelper h) {
+        int fixture = 0;
+        for (var ability : List.of(Ability.TERRIBLE_CHAKRAM, Ability.MAZE_ROSE)) {
+            var p = player(h, 8192 + fixture++ * 48);
+            try {
+                var spell = new Spell(MethodProjectile.INSTANCE, glyph(ability), com.hollingsworth.arsnouveau.common.spell.augment.AugmentSplit.INSTANCE);
+                var r = resolver(h, p, spell); h.assertTrue(r.onCast(ItemStack.EMPTY, h.getLevel()), "Real scatter spell casts");
+                h.assertTrue(payloads(h, p).size() == 2 && CapabilityRegistry.getMana(p).getCurrentMana() == 1000 - r.getExpendedCost() - 2 * ability.mana, "One Split adds one native weapon; each pays a quote in addition to one Ars launch price: ability=" + ability + ", count=" + payloads(h, p).size() + ", mana=" + CapabilityRegistry.getMana(p).getCurrentMana() + ", ars=" + r.getExpendedCost() + ", payload=" + ability.mana);
+                payloads(h, p).forEach(Entity::discard); ExecutionSessions.tick();
+                CapabilityRegistry.getMana(p).setMana(30 + ability.mana);
+                r = resolver(h, p, spell); h.assertTrue(r.onCast(ItemStack.EMPTY, h.getLevel()), "Affordable scatter still releases");
+                h.assertTrue(payloads(h, p).size() == 1 && CapabilityRegistry.getMana(p).getCurrentMana() == 0, "After paying Projectile plus Split, only one affordable payload appears; no unpaid scatter copies");
+            } finally { cleanup(h, p); }
+        }
+        h.succeed();
     }
     @GameTest(template="empty", batch="aqua_new", timeoutTicks=120)
     public static void nativeWeaponsReturnToTheirOwner(GameTestHelper h) {

@@ -140,6 +140,15 @@ public final class ShardGameTests {
         } catch (RuntimeException error) { targets.forEach(Entity::discard); players.forEach(p -> cleanup(h, p)); throw error; }
     }
     @GameTest(template="empty", batch="aqua_shard", timeoutTicks=40)
+    public static void bookValidationAllowsShardAmplifyWithoutChangingOrdinaryArs(GameTestHelper h) {
+        var valid = List.<AbstractSpellPart>of(MethodProjectile.INSTANCE, glyph(), AugmentAmplify.INSTANCE);
+        h.assertTrue(new com.hollingsworth.arsnouveau.common.spell.validation.AugmentCompatibilityValidator().validate(valid).isEmpty()
+                && dev.arsconflux.api.glyph.SpellValidators.validate(valid).isEmpty(), "Both native Ars book grammar and addon validation accept real shard power modifiers");
+        h.assertTrue(!dev.arsconflux.api.glyph.SpellValidators.validate(List.of(MethodProjectile.INSTANCE, AugmentAmplify.INSTANCE)).isEmpty(), "An ordinary Ars projectile does not acquire ineffective Amplify");
+        var weapon = GlyphCatalog.ALL.stream().filter(g -> g instanceof dev.aquamiraenouveau.projectile.ChakramGlyph).findFirst().orElseThrow();
+        h.assertTrue(!dev.arsconflux.api.glyph.SpellValidators.validate(List.of(MethodProjectile.INSTANCE, weapon, AugmentAmplify.INSTANCE)).isEmpty(), "Three-point native weapons cannot accept a damage modifier they do not implement"); h.succeed();
+    }
+    @GameTest(template="empty", batch="aqua_shard", timeoutTicks=40)
     public static void realSpawnReplacementBillsOnceAndVanillaIsUnaffected(GameTestHelper h) {
         var p = player(h); var marker = new Marker();
         try {

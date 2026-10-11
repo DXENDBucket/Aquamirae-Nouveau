@@ -1,6 +1,9 @@
 {
   "itemGroup.aquamirae_nouveau": "Aquamirae & Nouveau",
   "aquamirae_nouveau.cooldown": "%s 冷却中（%s 秒）。",
+  "aquamirae_nouveau.preparation": "海灵法术吟唱（%s 秒）",
+  "aquamirae_nouveau.preparation_cancelled": "吟唱已中断。",
+  "aquamirae_nouveau.validation.amplify": "该弹射物不支持增强。",
   "item.aquamirae_nouveau.glyph_armor_shatter": "护甲碎裂",
   "aquamirae_nouveau.name.armor_shatter": "护甲碎裂",
   "aquamirae_nouveau.description.armor_shatter": "使目标护甲碎裂，每层降低10%护甲。重复命中可叠加，最多五层。",

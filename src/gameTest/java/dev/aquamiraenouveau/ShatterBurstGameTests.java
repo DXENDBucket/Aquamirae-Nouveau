@@ -56,10 +56,10 @@ public final class ShatterBurstGameTests {
                 h.assertTrue(victim.getHealth() == before && CapabilityRegistry.getMana(p).getCurrentMana() == 1000, "One level below the native threshold produces no damage or charge");
                 full(victim, burst, p); before = victim.getHealth(); resolve(h, p, victim, burst);
                 float amount = burst == Ability.ARMOR_BURST ? 6 : 4;
-                h.assertTrue(Math.abs(before - victim.getHealth() - amount) < .001 && CapabilityRegistry.getMana(p).getCurrentMana() == 940, "Native bonus damage and one payload payment");
+                h.assertTrue(Math.abs(before - victim.getHealth() - amount) < .001 && CapabilityRegistry.getMana(p).getCurrentMana() == (burst == Ability.ARMOR_BURST ? 980 : 985), "Native bonus damage and one payload payment");
                 h.assertTrue(NativeAbilities.currentLevel(victim, state(burst)) == threshold(burst), "Native burst does not consume or reset stacks");
                 before = victim.getHealth(); resolve(h, p, victim, burst);
-                h.assertTrue(victim.getHealth() == before && CapabilityRegistry.getMana(p).getCurrentMana() == 940, "Invulnerability rejects a second payment");
+                h.assertTrue(victim.getHealth() == before && CapabilityRegistry.getMana(p).getCurrentMana() == (burst == Ability.ARMOR_BURST ? 980 : 985), "Invulnerability rejects a second payment");
             }
             h.succeed();
         } finally { victim.discard(); p.discard(); }
@@ -97,7 +97,7 @@ public final class ShatterBurstGameTests {
             h.assertTrue(victim.getLastHurtByMob() == owner && marker.hits == 1 && marker.victim == victim && marker.owner == owner,
                     "Native source and following Ars effect retain the explicit damage owner and target: actualAttacker=" + victim.getLastHurtByMob()
                             + ", owner=" + owner + ", payer=" + p + ", hits=" + marker.hits + ", markerOwner=" + marker.owner + ", markerVictim=" + marker.victim);
-            h.assertTrue(Math.abs(before - CapabilityRegistry.getMana(p).getCurrentMana() - r.getExpendedCost() - 260) < .001
+            h.assertTrue(Math.abs(before - CapabilityRegistry.getMana(p).getCurrentMana() - r.getExpendedCost() - 220) < .001
                     && CapabilityRegistry.getMana(owner).getCurrentMana() == 1000, "Original caster pays five state activations and one burst; owner is not the payer");
             h.succeed();
         } finally { victim.discard(); p.discard(); owner.discard(); }
