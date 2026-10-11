@@ -92,6 +92,8 @@ Forge 7.1.14 没有该实体，因此不注册深渊碎晶、配置或获取配�
 创造模式默认绕过冷却，可通过 `creativeCooldown` 启用；`cooldowns.enabled` 全局关闭，某个 `cooldowns.seconds` 设为 0 仅关闭该魔符。
 未命中也会记主动释放冷却；是否扣载荷费取决于后续效果是否成功触发。
 
+Mana、吟唱和冷却的比较与调整提案见 [dev.8 平衡审计](docs/balance-audit-dev8.md)；审计建议尚未改变运行数值。
+
 在自己的工作树及固定 Conflux 检出目录构建；当前为独立 `../Ars-Conflux-allies`，固定提交 `b24f18d72e64a902ff6c966040b0b83ea3cc6226`。依赖放在忽略的 `libs/`、`forge/libs/`，哈希见各自 `dependencies.lock.json`。
 NeoForge 在根目录用 Java 21；Forge 在 `forge/` 用 Java 17，各自运行 `./gradlew.bat :runGameTestServer :jar :sourcesJar --offline --console=plain`。
 Forge `jar` 会执行 `reobfJar`；只使用重混淆后的最终 JAR。两版可用 `-PconfluxCheckout=...` 指定独立 Core。

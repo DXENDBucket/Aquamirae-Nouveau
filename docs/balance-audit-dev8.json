@@ -1,0 +1,738 @@
+{
+  "date": "2026-10-12",
+  "addon_version": "0.1.0-dev.8",
+  "inspected_addon_commit": "450e4133875a366bd5717a356fd99a57dea6e14a",
+  "fixed_core_commit": "b24f18d72e64a902ff6c966040b0b83ea3cc6226",
+  "evidence": "static_published_jars_adapter_sources_and_local_configs",
+  "runtime_balance_tested": false,
+  "client_verified": false,
+  "changes_applied": false,
+  "native_dependencies": {
+    "neoforge": [
+      {
+        "file": "aquamirae.jar",
+        "modid": "aquamirae",
+        "version": "7.2.11",
+        "sha256": "5b8b2d04e16755d354adf3dfa77f906e33509722e647b1b5fdd5ccebabc8a35e"
+      },
+      {
+        "file": "ars.jar",
+        "modid": "ars_nouveau",
+        "version": "5.13.3",
+        "sha256": "45c1b6022d8e63464177c1f822bda22c3d6fb66970857fd7677e4e3ccffd259f"
+      }
+    ],
+    "forge": [
+      {
+        "file": "aquamirae-forge1201.jar",
+        "modid": "aquamirae",
+        "version": "7.1.14",
+        "sha256": "5439edc57af3075a1600effe0906ba322e89346077bcb80b761a4bff4cbff59b"
+      },
+      {
+        "file": "ars-nouveau-forge1201.jar",
+        "modid": "ars_nouveau",
+        "version": "4.12.7",
+        "sha256": "1f1debc282a0c379c1141f2840ea294eede6f6b544c589663f40bbe17b59a1af"
+      }
+    ]
+  },
+  "current_abilities": [
+    {
+      "id": "armor_shatter",
+      "default_trigger_mana": 40,
+      "configured_trigger_mana": 40,
+      "default_cooldown_seconds": 2,
+      "configured_cooldown_seconds": 2,
+      "duration_ticks": 240,
+      "platforms": [
+        "neoforge",
+        "forge"
+      ],
+      "default_glyph_tier": 1
+    },
+    {
+      "id": "health_shatter",
+      "default_trigger_mana": 60,
+      "configured_trigger_mana": 60,
+      "default_cooldown_seconds": 3,
+      "configured_cooldown_seconds": 3,
+      "duration_ticks": 240,
+      "platforms": [
+        "neoforge",
+        "forge"
+      ],
+      "default_glyph_tier": 1
+    },
+    {
+      "id": "fury_of_the_depths",
+      "default_trigger_mana": 60,
+      "configured_trigger_mana": 60,
+      "default_cooldown_seconds": 5,
+      "configured_cooldown_seconds": 5,
+      "duration_ticks": 600,
+      "platforms": [
+        "neoforge",
+        "forge"
+      ],
+      "default_glyph_tier": 1
+    },
+    {
+      "id": "resilience_of_the_depths",
+      "default_trigger_mana": 60,
+      "configured_trigger_mana": 60,
+      "default_cooldown_seconds": 5,
+      "configured_cooldown_seconds": 5,
+      "duration_ticks": 600,
+      "platforms": [
+        "neoforge",
+        "forge"
+      ],
+      "default_glyph_tier": 1
+    },
+    {
+      "id": "abyssal_shard",
+      "default_trigger_mana": 80,
+      "configured_trigger_mana": 80,
+      "default_cooldown_seconds": 2,
+      "configured_cooldown_seconds": 2,
+      "duration_ticks": 0,
+      "platforms": [
+        "neoforge"
+      ],
+      "default_glyph_tier": 1
+    },
+    {
+      "id": "scyphoid_sting",
+      "default_trigger_mana": 40,
+      "configured_trigger_mana": 40,
+      "default_cooldown_seconds": 3,
+      "configured_cooldown_seconds": 3,
+      "duration_ticks": 60,
+      "platforms": [
+        "neoforge",
+        "forge"
+      ],
+      "default_glyph_tier": 1
+    },
+    {
+      "id": "terrible_chakram",
+      "default_trigger_mana": 60,
+      "configured_trigger_mana": 60,
+      "default_cooldown_seconds": 3,
+      "configured_cooldown_seconds": 3,
+      "duration_ticks": 0,
+      "platforms": [
+        "neoforge",
+        "forge"
+      ],
+      "default_glyph_tier": 1
+    },
+    {
+      "id": "maze_rose",
+      "default_trigger_mana": 70,
+      "configured_trigger_mana": 70,
+      "default_cooldown_seconds": 3,
+      "configured_cooldown_seconds": 3,
+      "duration_ticks": 0,
+      "platforms": [
+        "neoforge",
+        "forge"
+      ],
+      "default_glyph_tier": 1
+    },
+    {
+      "id": "armor_burst",
+      "default_trigger_mana": 60,
+      "configured_trigger_mana": 60,
+      "default_cooldown_seconds": 3,
+      "configured_cooldown_seconds": 3,
+      "duration_ticks": 0,
+      "platforms": [
+        "neoforge",
+        "forge"
+      ],
+      "default_glyph_tier": 1
+    },
+    {
+      "id": "health_burst",
+      "default_trigger_mana": 60,
+      "configured_trigger_mana": 60,
+      "default_cooldown_seconds": 3,
+      "configured_cooldown_seconds": 3,
+      "duration_ticks": 0,
+      "platforms": [
+        "neoforge",
+        "forge"
+      ],
+      "default_glyph_tier": 1
+    },
+    {
+      "id": "eel_roar",
+      "default_trigger_mana": 40,
+      "configured_trigger_mana": 40,
+      "default_cooldown_seconds": 5,
+      "configured_cooldown_seconds": 5,
+      "duration_ticks": 100,
+      "platforms": [
+        "neoforge",
+        "forge"
+      ],
+      "default_glyph_tier": 1
+    },
+    {
+      "id": "eel_bite",
+      "default_trigger_mana": 70,
+      "configured_trigger_mana": 70,
+      "default_cooldown_seconds": 3,
+      "configured_cooldown_seconds": 3,
+      "duration_ticks": 100,
+      "platforms": [
+        "neoforge",
+        "forge"
+      ],
+      "default_glyph_tier": 1
+    },
+    {
+      "id": "cornelia_vortex",
+      "default_trigger_mana": 80,
+      "configured_trigger_mana": 80,
+      "default_cooldown_seconds": 10,
+      "configured_cooldown_seconds": 10,
+      "duration_ticks": 200,
+      "platforms": [
+        "neoforge",
+        "forge"
+      ],
+      "default_glyph_tier": 1
+    }
+  ],
+  "compiled_recipe_samples": [
+    {
+      "recipe": "self -> eel_roar",
+      "seconds": 5,
+      "payload_mana": 56,
+      "ars_mana": 10,
+      "full_mana": 66
+    },
+    {
+      "recipe": "self -> eel_roar -> extend",
+      "seconds": 15,
+      "payload_mana": 96,
+      "ars_mana": 20,
+      "full_mana": 116
+    },
+    {
+      "recipe": "self -> cornelia_vortex",
+      "seconds": 10,
+      "payload_mana": 152,
+      "ars_mana": 10,
+      "full_mana": 162
+    },
+    {
+      "recipe": "self -> cornelia_vortex -> extend",
+      "seconds": 20,
+      "payload_mana": 232,
+      "ars_mana": 20,
+      "full_mana": 252
+    },
+    {
+      "recipe": "self -> cornelia_vortex -> amplify",
+      "seconds": 10,
+      "payload_mana": 162,
+      "ars_mana": 30,
+      "full_mana": 192
+    },
+    {
+      "recipe": "self -> cornelia_vortex -> aoe",
+      "seconds": 10,
+      "payload_mana": 152,
+      "ars_mana": 45,
+      "full_mana": 197
+    },
+    {
+      "recipe": "projectile -> eel_bite",
+      "payload_mana": 70,
+      "ars_mana": 10,
+      "full_mana": 80
+    },
+    {
+      "recipe": "projectile -> eel_bite -> amplify",
+      "payload_mana": 80,
+      "ars_mana": 30,
+      "full_mana": 110
+    }
+  ],
+  "instance_snapshot": {
+    "instance": "C:\\Users\\57991\\Desktop\\.minecraft\\versions\\1.21.1-万法归一",
+    "configs": {
+      "config/aquamirae_nouveau-server.toml": {
+        "sha256": "1ae2bd6951dcfd6f815850afe6aa4aa7ee4ade9546f83f7ec967f9353b435ac5",
+        "settings": {
+          "mana": {
+            "amplify": 10,
+            "armor_shatter": 40,
+            "health_shatter": 60,
+            "fury_of_the_depths": 60,
+            "resilience_of_the_depths": 60,
+            "abyssal_shard": 80,
+            "scyphoid_sting": 40,
+            "terrible_chakram": 60,
+            "maze_rose": 70,
+            "armor_burst": 60,
+            "health_burst": 60,
+            "eel_roar": 40,
+            "eel_bite": 70,
+            "cornelia_vortex": 80
+          },
+          "duration": {
+            "extendTicks": 200,
+            "armor_shatter": 240,
+            "health_shatter": 240,
+            "fury_of_the_depths": 600,
+            "resilience_of_the_depths": 600,
+            "scyphoid_sting": 60,
+            "eel_roar": 100,
+            "eel_bite": 100,
+            "cornelia_vortex": 200
+          },
+          "cooldowns": {
+            "enabled": true,
+            "creativeCooldown": false,
+            "seconds": {
+              "armor_shatter": 2,
+              "health_shatter": 3,
+              "fury_of_the_depths": 5,
+              "resilience_of_the_depths": 5,
+              "abyssal_shard": 2,
+              "scyphoid_sting": 3,
+              "terrible_chakram": 3,
+              "maze_rose": 3,
+              "armor_burst": 3,
+              "health_burst": 3,
+              "eel_roar": 5,
+              "eel_bite": 3,
+              "cornelia_vortex": 10
+            }
+          },
+          "creatureActions": {
+            "biteDamage": 8.0,
+            "roarUpkeep": 4,
+            "vortexUpkeep": 8
+          }
+        }
+      },
+      "config/ars_conflux-server.toml": {
+        "sha256": "757d00f09b5317eed412ac144b51d4adff344fca9614d44ab861f80d69c1da98",
+        "settings": {
+          "ars_trigger_billing": {
+            "enabled": false
+          },
+          "active_casting": {
+            "chant_mode": "MAXIMUM"
+          }
+        }
+      },
+      "config/aquamirae_nouveau/glyph_eel_roar.toml": {
+        "sha256": "dce9b819f6078583fe575c1f465b0c1bcda44e64edb02d367728512adf65fafe",
+        "settings": {
+          "general": {
+            "enabled": true,
+            "cost": 0,
+            "starter": false,
+            "per_spell_limit": 2147483647,
+            "glyph_tier": 1,
+            "augment_limits": [],
+            "augment_cost_overrides": [],
+            "invalid_combos": []
+          }
+        }
+      },
+      "config/aquamirae_nouveau/glyph_eel_bite.toml": {
+        "sha256": "dce9b819f6078583fe575c1f465b0c1bcda44e64edb02d367728512adf65fafe",
+        "settings": {
+          "general": {
+            "enabled": true,
+            "cost": 0,
+            "starter": false,
+            "per_spell_limit": 2147483647,
+            "glyph_tier": 1,
+            "augment_limits": [],
+            "augment_cost_overrides": [],
+            "invalid_combos": []
+          }
+        }
+      },
+      "config/aquamirae_nouveau/glyph_cornelia_vortex.toml": {
+        "sha256": "dce9b819f6078583fe575c1f465b0c1bcda44e64edb02d367728512adf65fafe",
+        "settings": {
+          "general": {
+            "enabled": true,
+            "cost": 0,
+            "starter": false,
+            "per_spell_limit": 2147483647,
+            "glyph_tier": 1,
+            "augment_limits": [],
+            "augment_cost_overrides": [],
+            "invalid_combos": []
+          }
+        }
+      },
+      "config/ars_nouveau/glyph_harm.toml": {
+        "sha256": "e132dad7db10594ae4c4f421300194e66d242b3c12017b5bd878cc6d17c0c781",
+        "settings": {
+          "general": {
+            "enabled": true,
+            "cost": 15,
+            "starter": true,
+            "per_spell_limit": 2147483647,
+            "glyph_tier": 1,
+            "augment_limits": [
+              "ars_nouveau:glyph_amplify=2"
+            ],
+            "augment_cost_overrides": [],
+            "invalid_combos": [],
+            "damage": 5.0,
+            "amplify": 2.0,
+            "potion_time": 5,
+            "extend_time": 5
+          }
+        }
+      },
+      "config/irons_nouveau-server.toml": {
+        "sha256": "5d8f785d7f2f8fb86a2f7ad6bc74536ccfba4c4bb4d7a2583e5e3ef63e465908",
+        "settings": {
+          "spell_levels": {
+            "mode": "PERSONAL_SCROLL",
+            "default_level": 1,
+            "overrides": [],
+            "creative_native_max": true
+          },
+          "chanting": {
+            "enabled": true,
+            "mode": "MAXIMUM"
+          },
+          "cooldowns": {
+            "enabled": true
+          },
+          "movement": {
+            "enabled": true
+          },
+          "mana": {
+            "use_iron_mana": false
+          }
+        }
+      },
+      "config/goety_nouveau-server.toml": {
+        "sha256": "9255fa9581018b33082b4b9dd330459c893df270e75b1b35c2d13c5de45ab4ec",
+        "settings": {
+          "resources": {
+            "source": "SOUL_ENERGY",
+            "burningCostPerUnit": 5,
+            "extensionCostPerUnit": 5,
+            "lifeAbsorbCost": 5,
+            "soulEaterCostPerUnit": 5
+          },
+          "chanting": {
+            "enabled": true,
+            "movementRestrictions": true
+          },
+          "cooldowns": {
+            "enabled": true,
+            "creativeCooldown": false
+          },
+          "channels": {
+            "unboundedDurationTicks": 200
+          }
+        }
+      },
+      "config/bomd_nouveau-server.toml": {
+        "sha256": "49538fadb0246ec955c7242af9efc87ace6b6b2798aef85ab96422eae0924a8d",
+        "settings": {
+          "comet_terrain_damage": false,
+          "mana": {
+            "lich_missile": 40,
+            "petal_blade": 50,
+            "lich_comet": 200,
+            "spore_ball": 150,
+            "comet_burst": 200,
+            "spore_burst": 150,
+            "per_amplify": 10,
+            "obsidian_burst": 200,
+            "fire_wave": 300,
+            "obsidian_spikes": 240,
+            "earthdive": 100,
+            "gauntlet_laser": 120
+          },
+          "cooldowns": {
+            "enabled": true,
+            "creativeCooldown": false,
+            "seconds": {
+              "lich_missile": 2.0,
+              "petal_blade": 2.0,
+              "lich_comet": 15.0,
+              "spore_ball": 10.0,
+              "comet_burst": 15.0,
+              "spore_burst": 10.0,
+              "obsidian_burst": 10.0,
+              "fire_wave": 12.0,
+              "obsidian_spikes": 12.0,
+              "earthdive": 5.0,
+              "gauntlet_laser": 10.0
+            }
+          }
+        }
+      },
+      "config/cataclysm_nouveau-server.toml": {
+        "sha256": "20d7ed140e3815de6fe409cfc44b0e39bdecf9fdcb8be565ac9c47a4239b99e9",
+        "settings": {
+          "mana": {
+            "amethyst_cluster": 60,
+            "lionfish_spike": 25,
+            "bolt_strike": 80,
+            "per_amplify": 10,
+            "void_rune": 60,
+            "flame_jet": 50,
+            "ceraunus": 60,
+            "wave": 90,
+            "flare_bomb": 300,
+            "lava_bomb": 180,
+            "earthquake": 220,
+            "fissure": 240,
+            "flame_ring": 300,
+            "shoulder_check": 160,
+            "lava_absorption": 300,
+            "monstrous": 120,
+            "bone_fracture": 40,
+            "lava_walking": 80,
+            "water_spear": 90,
+            "lightning_spear": 110,
+            "storm_serpent": 160,
+            "lightning_storm": 180,
+            "lightning_field": 160,
+            "storm_burst": 500
+          },
+          "bolt_strike": {
+            "damage": 16.0,
+            "warmup_ticks": 34
+          },
+          "void_rune": {
+            "damage": -1.0,
+            "warmup_ticks": 10
+          },
+          "flame_jet": {
+            "damage": -1.0,
+            "warmup_ticks": 10
+          },
+          "ceraunus": {
+            "damage": -1.0
+          },
+          "wave": {
+            "damage": 9.0,
+            "lifetime_ticks": 80
+          },
+          "cooldowns": {
+            "enabled": true,
+            "creative_cooldown": false,
+            "ticks": {
+              "amethyst_cluster": 0,
+              "lionfish_spike": 0,
+              "bolt_strike": 0,
+              "void_rune": 0,
+              "flame_jet": 0,
+              "ceraunus": 40,
+              "wave": 100,
+              "flare_bomb": 160,
+              "lava_bomb": 100,
+              "earthquake": 160,
+              "fissure": 200,
+              "flame_ring": 200,
+              "shoulder_check": 80,
+              "lava_absorption": 400,
+              "monstrous": 350,
+              "bone_fracture": 0,
+              "lava_walking": 0,
+              "water_spear": 40,
+              "lightning_spear": 60,
+              "storm_serpent": 120,
+              "lightning_storm": 80,
+              "lightning_field": 100,
+              "storm_burst": 240
+            }
+          },
+          "flare_bomb": {
+            "direct_damage": 7.0,
+            "jet_damage": 7.0
+          },
+          "monstrosity": {
+            "quake_radius": 6.25,
+            "absorption_heal": 15.0,
+            "charge_speed": 0.75,
+            "lava_lifetime_ticks": 200
+          },
+          "bone_fracture": {
+            "duration_ticks": 100
+          },
+          "lava_walking": {
+            "duration_ticks": 600
+          },
+          "scylla": {
+            "spear_damage": -1.0,
+            "storm_damage": -1.0,
+            "field_damage": -1.0,
+            "serpent_damage": -1.0,
+            "storm_health_fraction": -1.0,
+            "storm_delay_ticks": 10,
+            "field_duration_ticks": 160
+          }
+        }
+      },
+      "config/ars_n_spells-server.toml": {
+        "sha256": "5c3f526187ff33f3ee1117d92b9d08be3afaec27d6082c96f8f8f9852e073049",
+        "settings": {
+          "Master Toggles": {
+            "mana_unification_mode": "ars_primary",
+            "enable_mana_unification": true,
+            "enable_resonance_system": true,
+            "enable_cooldown_system": false,
+            "enable_progression_system": true,
+            "enable_affinity_system": true,
+            "debug_mode": false
+          },
+          "Mana Unification": {
+            "conversion_rate_ars_to_iron": 1.0,
+            "conversion_rate_iron_to_ars": 1.0,
+            "hybrid_mana_bar": "irons",
+            "dual_cost_ars_percentage": 0.5,
+            "dual_cost_iss_percentage": 0.5,
+            "default_max_mana": 100.0,
+            "respect_armor_bonuses": true,
+            "respect_enchantments": true,
+            "cross_system_regen_conversion": "EQUAL_EFFECT",
+            "cross_system_regen_multiplier": 1.0,
+            "cross_system_regen_reference_pool": 100.0
+          },
+          "Spell Scaling": {
+            "spell_power_cap": 3.0,
+            "enable_cross_mod_combat_stats": true,
+            "enable_irons_power_for_ars_damage": true,
+            "enable_ars_damage_for_irons_damage": true,
+            "multi_school_power_policy": "primary"
+          }
+        }
+      }
+    },
+    "jars": {
+      "aquamirae_nouveau": {
+        "name": "aquamirae-nouveau-0.1.0-dev.8-mc1.21.1-neoforge.jar",
+        "version": "0.1.0-dev.8",
+        "sha256": "a2a815b45543f5cebc26c8ef143b153cacf628a4e70e163276419fd4cb69ae60"
+      },
+      "ars_conflux": {
+        "name": "ars-conflux-0.1.17-mc1.21.1-neoforge.jar",
+        "version": "0.1.17",
+        "sha256": "6dde2ad9c72984c3bd3115db161b9c7e8f22884c524c6b09c05649e8152a5b46"
+      },
+      "ars_n_spells": {
+        "name": "ars_n_spells-3.3.5.jar",
+        "version": "3.3.5",
+        "sha256": "652b0a355818a8b61e1b481972ea080773d67d6865c5bccf2c69cac79d057ceb"
+      },
+      "bomd_nouveau": {
+        "name": "bomd-nouveau-0.1.0-dev.8-mc1.21.1-neoforge.jar",
+        "version": "0.1.0-dev.8",
+        "sha256": "7adfa83c69a053ee8efacba3ab19ad4f340230e0c4d7b7d2ff84ad1ccfc56d11"
+      },
+      "cataclysm_nouveau": {
+        "name": "cataclysm-nouveau-0.1.0-dev.12-mc1.21.1-neoforge.jar",
+        "version": "0.1.0-dev.12",
+        "sha256": "6d1c192253fdb8db0459fc196c3cea8ace472793079426ed2268b04cbf38d3c0"
+      },
+      "goety_nouveau": {
+        "name": "goety-nouveau-0.1.0-dev.53-mc1.21.1-neoforge.jar",
+        "version": "0.1.0-dev.53",
+        "sha256": "637576d4f11220d90dcc6d072eccbb437ea170b8edab28149aa7cd664a1f2016"
+      },
+      "irons_nouveau": {
+        "name": "irons-nouveau-0.17.14-mc1.21.1-neoforge.jar",
+        "version": "0.17.14",
+        "sha256": "c1edc9aaff24fa618ac5307fd75230d77580b0c1e0499db8d6751b9206bd4dc0"
+      },
+      "irons_spellbooks": {
+        "name": "[Iron的法术与魔法书] irons_spellbooks-1.21.1-3.16.3.jar",
+        "version": "1.21.1-3.16.3",
+        "sha256": "13d644474ddba4f8478b4ce68294687fd509c994b3f344a224142b102dbe6f73"
+      },
+      "ars_nouveau": {
+        "name": "[新生魔艺] ars_nouveau-1.21.1-5.13.3.jar",
+        "version": "${file.jarVersion}",
+        "sha256": "45c1b6022d8e63464177c1f822bda22c3d6fb66970857fd7677e4e3ccffd259f"
+      },
+      "aquamirae": {
+        "name": "[海灵物语] aquamirae-neoforge-1.21.1-7.2.11.jar",
+        "version": "7.2.11",
+        "sha256": "5b8b2d04e16755d354adf3dfa77f906e33509722e647b1b5fdd5ccebabc8a35e"
+      },
+      "cataclysm": {
+        "name": "[灾变] L_Ender's Cataclysm 1.21.1-3.33.jar",
+        "version": "3.33",
+        "sha256": "371956d0c2e3b56729ee93b955e936875d210e372fe734cdb74326d89ef79875"
+      },
+      "goety": {
+        "name": "[诡厄巫法] goety-3.2.0.jar",
+        "version": "${file.jarVersion}",
+        "sha256": "edeeb623f626bc85bd26df6458dbb440fd4b044f34f3de78ee715cbc01e692d8"
+      }
+    }
+  },
+  "proposals": {
+    "eel_roar": {
+      "first_mana": 80,
+      "upkeep_per_second": 12,
+      "cooldown_seconds": 30,
+      "candidate_max_duration_seconds": 15,
+      "candidate_preparation_ticks": 13,
+      "full_default_payload_mana": 128
+    },
+    "cornelia_vortex": {
+      "first_mana": 120,
+      "upkeep_per_second": 16,
+      "cooldown_seconds": 45,
+      "candidate_max_duration_seconds": 20,
+      "candidate_preparation_ticks": 20,
+      "full_default_payload_mana": 264
+    },
+    "eel_bite": {
+      "trigger_mana": 100,
+      "cooldown_seconds": 5
+    },
+    "armor_burst": {
+      "trigger_mana": 20,
+      "cooldown_seconds": 3
+    },
+    "health_burst": {
+      "trigger_mana": 15,
+      "cooldown_seconds": 3
+    },
+    "scyphoid_sting": {
+      "trigger_mana": 40,
+      "cooldown_seconds": 5
+    },
+    "terrible_chakram": {
+      "trigger_mana": 40,
+      "cooldown_seconds": 3,
+      "requires_return_and_crowd_sample": true
+    },
+    "maze_rose": {
+      "trigger_mana": 50,
+      "cooldown_seconds": 5,
+      "requires_return_and_crowd_sample": true
+    }
+  },
+  "limits": [
+    "No claim that Goety soul energy equals Ars Mana.",
+    "Iron benchmark inspected on NeoForge, not extrapolated to Forge.",
+    "Actual equipment, reductions, enemy defenses and target counts are not simulated.",
+    "Extended and delayed aura creation requires coverage and recovery policy in addition to the proposed numeric cooldown."
+  ]
+}
