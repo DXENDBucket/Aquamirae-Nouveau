@@ -111,7 +111,8 @@ def main():
             shutil.copy2(backup, path)
             raise ValueError('Written settings failed validation; original restored')
         result.update(applied=True, backup=str(backup), after_sha256=hashlib.sha256(path.read_bytes()).hexdigest())
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    # ASCII-safe JSON also works when a Windows subprocess pipe defaults to the legacy code page.
+    print(json.dumps(result, ensure_ascii=True, indent=2))
 
 if __name__ == '__main__':
     main()
