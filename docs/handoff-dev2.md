@@ -4,6 +4,7 @@
 
 - 工作树：C:/Users/57991/Documents/MinecraftDev/parallel-workspaces/aquamirae-first-abilities/Aquamirae-Nouveau。
 - 分支：agent/aquamirae-first-abilities；仍未合并 main，无远程推送。
+- 实现提交：da3fc38007741f5258c7dffab6f7fe05a7f3146f；本行作为后续交接记录提交，不改变发行包。
 - Core 工作树：上级 Ars-Conflux；固定完整 SHA 3eccd65fc569cd43ef960ef3eee77963ef201ac8。受版本控制文件未修改，无 Core API 扩展。
 - 平台/Java/依赖与首批一致：NeoForge 1.21.1 / Java 21 / Aquamirae 7.2.11 / Ars 5.13.3；Forge 1.20.1 / Java 17 / Aquamirae 7.1.14 / Ars 4.12.7。依赖精确锁定见各自 dependencies.lock.json。
 - 授权仍仅部署本附属至用户的 NeoForge 人工测试 mods 目录，其他模组和实例配置不修改。
