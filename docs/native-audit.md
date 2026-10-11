@@ -81,7 +81,7 @@ NeoForge 本体 HookLivingEntity 按 affected_by_depths_fury / affected_by_depth
 | ShatterbladeFullAbility | HEALTH_SHATTER 达到默认 10 层后增加默认 4 点，保留相同声音；接入为碎命迸裂 |
 | TidepiercerAbility | 仅实际伤害所有者 isUnderWater 时按海平面以下深度每格 2% 提高伤害，上限额外 200%；可作为后续伤害增强候选，需要核对 Ars 伤害范围与原装备叠加 |
 | TerribleFangBaseAbility | 缺失心数提高伤害，Neo 数值来自本体配置，Forge 为原生常量；满血目标是否翻倍取决于原生完整能力是否在装备集合激活，不能仅按“满血翻倍”无条件接入 |
-| RemnantSaberAbility | 对 ice_maze_creatures 使用玩家本体长期击杀加成，最大值来自配置；回血仅 Captain Cornelia 实体，不能把它写成普遍吸血 |
+| RemnantSaberAbility | 对 ice_maze_creatures 使用玩家本体长期击杀加成，最大值来自配置；回血检查 self 的实体类型必须为 Captain Cornelia，玩家持刀不会获得该回血。不是检查 victim 是否为船长，也不是通用吸血 |
 | TempestTridentAbility | 虽声明 duration / shock_duration，实际 modifyOutgoingDamage 是水下乘以 1 + duration；未出现通用电击或闪电入口，暂缓，不能凭名称编造雷击 |
 | DaggerOfGreedAbility | 概率产出绿宝石，同时有概率直接缩减 self 主手堆叠；不适合直接调用为魔符，可能损坏施法工具 |
 | TerribleBladeFullAbility | 击杀已中毒目标后给 self 再生，来自装备而非食物；Neo 回调带 DamageSource，Forge 回调不带；可考虑后续击杀增强，需要实际击杀时序与结算设计 |
@@ -130,7 +130,7 @@ ShellHornItem 生成的是 Captain Cornelia Boss 及其遭遇事件，也不是�
 - 深海头饰 `abyssal_tiara` 的死亡延缓：两版公开 cancelDeath 都恢复满血并给予默认 300 秒结晶化，拒绝重复结晶化及对应致命伤害。现在确认两版移除结晶化都可触发致命伤害，参见下一节；作为保护 effect 有原生来源，但需专门设计预先施加保护、死亡取消、消耗与净化时序，暂不作为首选，也不把结晶化直接做普通攻击减益。
 - 深海半套装备的负面状态转力量：原生每次有害效果加入后叠力量，最大 amplifier 2，即 III；适合未来响应类能力。不能伪造一次负面状态加入来调用，也不是随时可用的普通力量 effect。
 - 可怖盔甲的受击反毒／水下海豚恩惠：真实装备来源，但与已有水母毒素及冷光气泡重叠，优先级较低。
-- RemnantSaberAbility 的回血仅对 Captain Cornelia，不是通用吸血；DaggerOfGreedAbility 另有 1% 缩减主手堆叠，直接调用可能消耗法术工具，暂不选。
+- RemnantSaberAbility 的回血仅在实际攻击者 self 为 Captain Cornelia 时启用，玩家持刀不获得回血。此前“仅对 Captain Cornelia”的措辞含糊，不能理解为攻击船长就回血；该分支按目标最大生命的 40%（最高 30 点）给 self 回血，在伤害计算期间执行，并非按实际掉血量计算。它作为生物独有能力另列于下文。DaggerOfGreedAbility 另有 1% 缩减主手堆叠，直接调用可能消耗法术工具，暂不选。
 - Eel 吸血在动画攻击帧里按目标实际掉血的两倍回血；Maw、MazeMother、TorturedSoul 的普通攻击没有新的独立载荷。Captain Cornelia 拉扯、怒潮及视觉闪电依赖 Boss 动画／阶段／遭遇事件；没有找到可独立完整调用、适合这批 spell effect 的入口。不能通过隐形 Boss 或复制局部 AI 伪装适配。
 - DreadwakeTier3Ability 声明了再生、伤害吸收和碎晶变量，但该类没有处理回调；不能将变量或 tooltip 当作完整可调用能力。
 - DevouringCurse 实际食品来源为虚空鱿鱼，TorturedSoul 不施加该效果；MaelstromOmen 仅 Forge，来源为可饮用 NiveisTearItem，并涉及跨维度旅行。二者均不进入本轮非食物来源清单。原生持续毒免疫的问题仍保留，不通过附属修补。
@@ -140,6 +140,27 @@ ShellHornItem 生成的是 Captain Cornelia Boss 及其遭遇事件，也不是�
 以 CFR 0.152 再次读取两版实际发行 JAR，新增输出仅放忽略目录 `.upstream/candidate-audit-neo/` 与 `.upstream/candidate-audit-forge/`，没有复制原生代码或素材到受控源码／发行包。关键入口为上述 Ability 类，Neo `HookPlayer.tickSalvagerArmor` / Forge `PlayerHandler.tickSalvagerArmor`、两版 `LuminescentBubbleBlock.tick`，以及 Neo 的结晶化移除事件调用链。
 本轮计算 Aquamirae JAR SHA-256 与依赖锁一致：Neo `5b8b2d04e16755d354adf3dfa77f906e33509722e647b1b5fdd5ccebabc8a35e`；Forge `5439edc57af3075a1600effe0906ba322e89346077bcb80b761a4bff4cbff59b`。物品中文名来自各自 JAR 的 `assets/aquamirae/lang/zh_cn.json`，实现判断不依据 tooltip。
 仅文档变化，不运行 Gradle 或 GameTest，不产生新 JAR，不向人工测试目录复制任何文件，不改变 Core 基线。候选的 Ars 组合、友军处理、扣费、生命周期与客户端表现均尚未实现或验证；上文优先级是基于原生实现的设计判断。
+
+## 生物独有、玩家无常规获取的能力（后续筛选）
+
+用户进一步明确：主要考察其他生物会、玩家在原模组无法常规获取的能力。装备可正常获得不等于该装备在 Boss 身上的所有分支都向玩家开放；需要核对能力实际激活条件。先前装备／放置物来源候选整体搁置，没有删除已实现魔符。
+
+本轮读取两版完整 common/entity 类与 AI、全部注册生物（11 种），以及 Captain Cornelia 的装备选择、ShipbreakerEvent 和唱片触发入口；输出仅在忽略的 `.upstream/mob-audit-neo/`、`.upstream/mob-audit-forge/`。研究前附属提交为 `09134555e4f35410e8867622bcbc483d761bd3b9`，Core 固定提交与版本不变，受控文件仍无变化。
+
+| 优先级 | 候选 | 原生实际行为（两版均有） | 玩家来源检查与适配判断 |
+| --- | --- | --- | --- |
+| 优先 | 鳗鱼咆哮 | Eel.baseTick 在 roarState 的第 13–51 tick 对当前目标执行；距离使用平方值，必须小于 150（约 12.25 格）。持续添加从鳗鱼指向目标的水平排斥速度，保持原 Y 速度；刷新缓慢 II／黑暗 200 tick，并每次增加 1 冻结 tick。Mob 目标另转为攻击鳗鱼；咆哮开始播放原生 ENTITY_EEL_ROAR | 未找到同款玩家装备／食品／物品入口。属于短时持续压制 effect 候选；原生只操作当前目标，不能直接声称原生是群体声波，也不能把排斥写成吸引。适配需施法会话、友军筛选、同步与清理，完整载荷嵌在实体 tick 中，没有独立 roarPayload 方法 |
+| 优先 | 鳗鱼吸血咬击 | Eel.baseTick 在攻击动画第 14 tick、距离平方不超过 24 时记录目标攻击前血量，doHurtTarget 后按实际血量减少的两倍给自己回血。Eel.doHurtTarget 在近战伤害成功后调用本体 doPoison：中毒 III／100 tick | 未找到同款玩家常规来源。水母蜇刺已覆盖强中毒，但没有按实际伤害吸血；适合作为伤害 effect 或伤害增强。不能只复用 doHurtTarget 就宣称包含回血，回血在外层 tick；需确认本次真实掉血、实际伤害所有者、治疗对象与一次结算。仍需原创接线与原生载荷复用方案 |
+| 次选 | 船长旋流 | CaptainCorneliaBoss.baseTick 在自身拥有浮空期间，查询以自身为中心向各轴扩张 10 格的 LivingEntity，排除创造／旁观玩家；仅最大生命不超过 100 点的目标参与。持续令目标趋向半径 5 格的旋转位置，剩余浮空 1 tick 时向外推；原生幽灵粒子另由服务器发送 | 玩家持有船长武器不会得到这段 Boss tick 行为。比单次牵引更有组合价值，可评估持续控制 effect，但不能直接调用 rage()：它还恢复 Boss 阶段、生成视觉闪电、触发破船者与遭遇数据包。需专门接线，优先级低于鳗鱼 |
+| 保留研究 | 船长生命掠夺 | 船长 AI 会切换到残骸军刀；RemnantSaberAbility.modifyOutgoingDamage 仅在 self 类型为船长时给 self 回复 min(30, victim.maxHealth × 0.4)，随后处理对冰迷宫生物的攻击倍率。回血发生在伤害计算期间，未要求 hurt 成功 | 原武器虽然有常规来源，但玩家 self 类型不满足，因此玩家无法通过持刀获得该回血。与鳗鱼按实际掉血的吸血不同。存在公开完整方法，但直接以玩家调用会被类型限制排除；若做需限定本附属调用的类型条件适配及明确的触发／费用设计，不能装成现成可调用的玩家吸血。先优先鳗鱼，避免同批重复做两个吸血 |
+
+图标／获取来源还需正式设计：鳗鱼两版实际掉落包括 dead_sea_scroll、sharp_bones 等，可优先从真实掉落挑选，不能伪造专属鳗鱼牙；船长两版掉落 frozen_key，装备能力分支也可考虑 remnant_saber。相同物品被其他生物掉落不影响它是可用来源，但图标和配方不能宣称来源独占。
+
+其余筛掉：鮟鱇鱼有蓄势扑咬和中毒 I／10 秒，毒素与现有魔符重复，冲刺在 AnglerfishBiteGoal 中；鳗鱼遁地是动画第 25 tick 的地面位置传送，并依赖体型与落点查询，暂不把它重复包装成 Ars 已有闪现。船长单次拉拽与 Ars 原生 EffectPull 相近，不优先。迷宫之母周期破坏雪、冰、玻璃等标签方块，冰／霜冰转水，与普通破坏和化冰玩法重叠。Maw、TorturedSoul 没有新的独立攻击载荷；TorturedSoul 不施加 DevouringCurse。GoldenMoth 主要是捕捉与发光粒子；Scuttler 拾食、长大／进化和翻倒、Shellback 水上承载与缓慢自愈属于生物生态／坐骑，原生已有玩家互动途径，不作为这一批战斗魔符。
+
+ShipbreakerEvent 虽由船长 rage 触发，但两版的唱片机钩子也会在破裂唱片播放完毕时调用 trigger；Neo 另检查冰迷宫位置，Forge 对应方法没有这个额外位置判断。它有玩家原生触发路线，不符合本轮筛选优先项，且头部伤害为 Float.MAX_VALUE、身体推力与可配置地形破坏属于整个世界遭遇事件，不能视作普通低成本弹射物。
+
+本轮仅研究和文档修正，没有新增魔符、编译、测试或部署，所有候选适配均未实现／验证。下一轮若要实施，先评估鳗鱼两项的原生调用与完整表现方案；没有可直接独立调用的载荷时明确记录原创适配范围，不通过隐形原生怪物或复制其 AI 强行接入。
 
 ## 暂未接入的已知差异
 
