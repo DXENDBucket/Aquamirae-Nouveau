@@ -16,6 +16,11 @@ public final class AquamiraeNouveau {
     public AquamiraeNouveau() {
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         dev.aquamiraenouveau.projectile.ChakramEntities.TYPES.register(bus);
+        dev.aquamiraenouveau.platform.AuraEffects.TYPES.register(bus);
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.entity.EntityJoinLevelEvent event) -> {
+            if (!event.getLevel().isClientSide && event.getEntity() instanceof net.minecraft.world.entity.LivingEntity living)
+                CreatureAuras.clearOrphans(living);
+        });
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, AquamiraeConfig.SPEC);
         GlyphCatalog.register();
         bus.addListener((net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent event) -> event.enqueueWork(() -> {

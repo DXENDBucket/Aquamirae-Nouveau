@@ -9,7 +9,9 @@ public final class AquamiraeConfig {
     private static final EnumMap<Ability, ModConfigSpec.IntValue> COSTS = new EnumMap<>(Ability.class);
     private static final EnumMap<Ability, ModConfigSpec.IntValue> DURATIONS = new EnumMap<>(Ability.class);
     private static final EnumMap<Ability, ModConfigSpec.IntValue> COOLDOWNS = new EnumMap<>(Ability.class);
+    private static final EnumMap<Ability, ModConfigSpec.IntValue> UPKEEP = new EnumMap<>(Ability.class);
     private static final ModConfigSpec.IntValue AMPLIFY, EXTEND;
+    private static final ModConfigSpec.DoubleValue BITE_DAMAGE;
     private static final ModConfigSpec.BooleanValue COOLDOWN_ENABLED, CREATIVE_COOLDOWN;
     static {
         var builder = new ModConfigSpec.Builder();
@@ -19,10 +21,15 @@ public final class AquamiraeConfig {
         for (var ability : Ability.values()) if (NativeAbilities.supports(ability))
             COSTS.put(ability, builder.defineInRange(ability.id, ability.mana, 0, 1000000));
         builder.pop().push("duration");
-        EXTEND = builder.comment("Ticks added per Extend Time augment. Native status effects only.")
+        EXTEND = builder.comment("Ticks added per Extend Time augment to status effects and granted creature actions.")
                 .defineInRange("extendTicks", 200, 0, 72000);
         for (var ability : Ability.values()) if (NativeAbilities.supports(ability) && ability.duration > 0)
             DURATIONS.put(ability, builder.defineInRange(ability.id, ability.duration, 1, 72000));
+        builder.pop().push("creatureActions");
+        BITE_DAMAGE = builder.comment("Siphoning Bite base damage; the native eel's default attack damage is 8.")
+                .defineInRange("biteDamage", 8.0, 0.0, 1000000.0);
+        UPKEEP.put(Ability.EEL_ROAR, builder.comment("Mana prepaid per additional second of Eel Roar.").defineInRange("roarUpkeep", 4, 0, 1000000));
+        UPKEEP.put(Ability.CORNELIA_VORTEX, builder.comment("Mana prepaid per additional second of Cornelia's Vortex.").defineInRange("vortexUpkeep", 8, 0, 1000000));
         builder.pop().push("cooldowns");
         COOLDOWN_ENABLED = builder.comment("Gate new active casts through Ars Conflux. Ongoing branches are unaffected.").define("enabled", true);
         CREATIVE_COOLDOWN = builder.define("creativeCooldown", false);
@@ -33,6 +40,8 @@ public final class AquamiraeConfig {
         SPEC = builder.build();
     }
     public static int cost(Ability ability) { return COSTS.get(ability).get(); }
+    public static double biteDamage() { return BITE_DAMAGE.get(); }
+    public static int upkeep(Ability ability) { return UPKEEP.get(ability).get(); }
     public static int amplifyCost() { return AMPLIFY.get(); }
     public static int duration(Ability ability) { return DURATIONS.get(ability).get(); }
     public static int extendTicks() { return EXTEND.get(); }

@@ -26,4 +26,9 @@ public final class ChakramGlyph extends AbstractAugment implements ProjectileFor
     @Override public SpellTier defaultTier() { return SpellTier.ONE; }
     @Override public Set<AbstractAugment> getCompatibleAugments() { return Set.of(AugmentAccelerate.INSTANCE); }
     @Override public String getBookDescription() { return Component.translatable("aquamirae_nouveau.glyph_desc.glyph_" + ability.id).getString(); }
+    // Ars 5 calls this hook; Ars 4 has no equivalent method.
+    public void addAugmentDescriptions(java.util.Map<AbstractAugment, String> descriptions) {
+        descriptions.put(AugmentAccelerate.INSTANCE, Component.translatable(
+                "ars_nouveau.augment_desc." + getRegistryName().getPath() + "_glyph_accelerate").getString());
+    }
 }

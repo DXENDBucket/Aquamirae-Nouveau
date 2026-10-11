@@ -78,10 +78,10 @@ tasks.named('compileJava') { dependsOn generateConfig }
 tasks.named('sourcesJar') { dependsOn generateConfig }
 def testBridges = layout.buildDirectory.dir('generated/test-bridges')
 def generateTests = tasks.register('generateForgeTests') {
-    inputs.files '../src/gameTest/java/dev/aquamiraenouveau/AbilityGameTests.java', '../src/gameTest/java/dev/aquamiraenouveau/ChakramGameTests.java', '../src/gameTest/java/dev/aquamiraenouveau/ShatterBurstGameTests.java'
+    inputs.files '../src/gameTest/java/dev/aquamiraenouveau/AbilityGameTests.java', '../src/gameTest/java/dev/aquamiraenouveau/ChakramGameTests.java', '../src/gameTest/java/dev/aquamiraenouveau/ShatterBurstGameTests.java', '../src/gameTest/java/dev/aquamiraenouveau/CreatureGameTests.java'
     outputs.dir testBridges
     doLast {
-      for (name in ['AbilityGameTests.java', 'ChakramGameTests.java', 'ShatterBurstGameTests.java']) {
+      for (name in ['AbilityGameTests.java', 'ChakramGameTests.java', 'ShatterBurstGameTests.java', 'CreatureGameTests.java']) {
         def text = file('../src/gameTest/java/dev/aquamiraenouveau/' + name).getText('UTF-8')
                 .replace('template="empty"', 'template="empty", templateNamespace="aquamirae_nouveau"')
                 .replace('net.neoforged.neoforge.gametest', 'net.minecraftforge.gametest')

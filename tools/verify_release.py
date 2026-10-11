@@ -39,7 +39,14 @@ def check(platform):
                         namespace, loc = texture.split(':', 1)
                         assert f'assets/{namespace}/textures/{loc}.png' in native_files, f'Missing native texture: {texture}'
             recipes = [n for n in names if n.startswith('data/aquamirae_nouveau/recipe') and n.endswith('.json')]
-            assert len(recipes) == (9 if platform else 10), f'Wrong recipe count: {path}'
+            assert len(recipes) == (12 if platform else 13), f'Wrong recipe count: {path}'
+            atlas = json.loads(z.read('assets/minecraft/atlases/mob_effects.json'))
+            for entry in atlas['sources']:
+                namespace, texture = entry['resource'].split(':', 1)
+                assert f'assets/{namespace}/textures/{texture}.png' in native_files, 'Missing status icon source'
+            vortex = json.loads(z.read('data/aquamirae_nouveau/' + ('recipes/' if platform else 'recipe/') + 'glyph_cornelia_vortex.json'))
+            ingredients = vortex['inputItems'] if platform else vortex['inputs']
+            assert any((entry['item']['item'] if platform else entry['item']) == 'aquamirae:frozen_key' for entry in ingredients), 'Vortex must require the captain drop'
             for name in recipes:
                 recipe = json.loads(z.read(name))
                 glyph = recipe['output'] if platform else recipe['output']['id']

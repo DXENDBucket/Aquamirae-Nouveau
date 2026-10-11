@@ -183,7 +183,7 @@ public final class AbilityGameTests {
             h.assertTrue(h.getLevel().getRecipeManager().byKey(key).isPresent(), "Native glyph recipe loads: " + key);
             h.assertTrue(!g.getGlyph().getDefaultInstance().isEmpty(), "Glyph item exists: " + key);
         }
-        h.assertTrue(GlyphCatalog.ALL.size() == (NativeAbilities.supports(Ability.ABYSSAL_SHARD) ? 10 : 9), "Only native platform capabilities are registered");
+        h.assertTrue(GlyphCatalog.ALL.size() == (NativeAbilities.supports(Ability.ABYSSAL_SHARD) ? 13 : 12), "Only supported platform capabilities are registered");
         h.succeed();
     }
 

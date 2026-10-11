@@ -16,6 +16,11 @@ public final class AquamiraeNouveau {
     public AquamiraeNouveau(IEventBus bus, ModContainer container) {
         dev.aquamiraenouveau.projectile.ShardEntities.TYPES.register(bus);
         dev.aquamiraenouveau.projectile.ChakramEntities.TYPES.register(bus);
+        dev.aquamiraenouveau.platform.AuraEffects.TYPES.register(bus);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) -> {
+            if (!event.getLevel().isClientSide && event.getEntity() instanceof net.minecraft.world.entity.LivingEntity living)
+                CreatureAuras.clearOrphans(living);
+        });
         container.registerConfig(ModConfig.Type.SERVER, AquamiraeConfig.SPEC);
         GlyphCatalog.register();
         bus.addListener((net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent event) -> event.enqueueWork(() -> {

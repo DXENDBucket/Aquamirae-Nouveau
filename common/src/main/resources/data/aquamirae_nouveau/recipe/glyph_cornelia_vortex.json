@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "aquamirae_nouveau:glyph_cornelia_vortex",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "aquamirae:frozen_key"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

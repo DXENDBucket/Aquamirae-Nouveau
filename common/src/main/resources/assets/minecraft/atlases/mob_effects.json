@@ -1,0 +1,14 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "aquamirae:item/dead_sea_scroll",
+      "sprite": "aquamirae_nouveau:eel_roar"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "aquamirae:item/frozen_key",
+      "sprite": "aquamirae_nouveau:cornelia_vortex"
+    }
+  ]
+}

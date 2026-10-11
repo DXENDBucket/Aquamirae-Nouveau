@@ -34,6 +34,15 @@ GLYPHS = [
     ('health_burst', 'Health Burst', '碎命迸裂', 'shatterblade', 'shatterblade',
      'Deal Shatterblade\'s bonus damage to a target with ten levels of Health Shatter.',
      '生命碎裂达到十层时，造成裂解之刃的额外伤害。'),
+    ('eel_roar', 'Eel Roar', '鳗鱼咆哮', 'dead_sea_scroll', 'dead_sea_scroll',
+     'Grant an ally an eel\'s roar, repelling enemies ahead and inflicting Slowness and Darkness. Requires mana each second.',
+     '使友军持续向前咆哮，推开敌人并施加缓慢、黑暗与寒意。每秒消耗魔力。'),
+    ('eel_bite', 'Siphoning Bite', '吸血咬击', 'sharp_bones', 'sharp_bones',
+     'Bite and poison a target, healing the attacker for twice the health actually lost.',
+     '撕咬目标并使其中毒，按实际造成伤害的两倍为攻击者回血。'),
+    ('cornelia_vortex', "Cornelia's Vortex", '船长旋流', 'frozen_key', 'frozen_key',
+     'Grant an ally a vortex that swirls nearby enemies with up to 100 maximum health, then repels them. Requires mana each second.',
+     '使友军卷起旋流，牵动附近生命上限不超过100的敌人，结束时将其推开。每秒消耗魔力。'),
 ]
 
 def write(relative, data):
@@ -51,6 +60,17 @@ for lang in ['en_us', 'zh_cn']:
         values['aquamirae_nouveau.description.' + id_] = description
         values['aquamirae_nouveau.glyph_name.glyph_' + id_] = en if lang == 'en_us' else zh
         values['aquamirae_nouveau.glyph_desc.glyph_' + id_] = description
+        if id_ in ('eel_roar', 'cornelia_vortex'):
+            values['effect.aquamirae_nouveau.' + id_] = en if lang == 'en_us' else zh
+            values['ars_nouveau.augment_desc.glyph_' + id_ + '_glyph_aoe'] = 'Increase range.' if lang == 'en_us' else '扩大作用范围。'
+            values['ars_nouveau.augment_desc.glyph_' + id_ + '_glyph_extend_time'] = 'Extend the granted action.' if lang == 'en_us' else '延长持续时间。'
+            if id_ == 'cornelia_vortex':
+                values['ars_nouveau.augment_desc.glyph_' + id_ + '_glyph_amplify'] = 'Increase the maximum health limit by 50.' if lang == 'en_us' else '将可影响的生命上限提高50。'
+            continue
+        if id_ == 'eel_bite':
+            values['ars_nouveau.augment_desc.glyph_' + id_ + '_glyph_amplify'] = 'Increase bite damage.' if lang == 'en_us' else '提高咬击伤害。'
+            values['ars_nouveau.augment_desc.glyph_' + id_ + '_glyph_extend_time'] = 'Extend the poison.' if lang == 'en_us' else '延长中毒时间。'
+            continue
         if id_ in ('terrible_chakram', 'maze_rose'):
             values['ars_nouveau.augment_desc.glyph_' + id_ + '_glyph_accelerate'] = 'Increase launch speed.' if lang == 'en_us' else '提高发射速度。'
             continue
@@ -70,3 +90,9 @@ for id_, en, zh, texture, material, desc_en, desc_zh in GLYPHS:
           {'type': 'ars_nouveau:glyph', 'exp': 27,
            'output': {'id': 'aquamirae_nouveau:glyph_' + id_, 'count': 1},
            'inputs': [{'item': 'aquamirae:' + material}, {'item': 'ars_nouveau:source_gem'}]})
+
+# Alias the original source item textures into vanilla's status icon atlas without copying images.
+write('assets/minecraft/atlases/mob_effects.json', {'sources': [
+    {'type': 'minecraft:single', 'resource': 'aquamirae:item/' + material, 'sprite': 'aquamirae_nouveau:' + id_}
+    for id_, material in [('eel_roar', 'dead_sea_scroll'), ('cornelia_vortex', 'frozen_key')]
+]})

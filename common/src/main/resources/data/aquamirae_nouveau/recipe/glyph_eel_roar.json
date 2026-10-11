@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "aquamirae_nouveau:glyph_eel_roar",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "aquamirae:dead_sea_scroll"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

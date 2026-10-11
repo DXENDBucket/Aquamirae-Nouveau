@@ -16,6 +16,8 @@ public final class NativeAbilities {
             case TERRIBLE_CHAKRAM, MAZE_ROSE -> new dev.aquamiraenouveau.projectile.ChakramGlyph(ability);
             case SCYPHOID_STING -> new dev.aquamiraenouveau.ScyphoidStingGlyph();
             case ARMOR_BURST, HEALTH_BURST -> new dev.aquamiraenouveau.ShatterBurstGlyph(ability);
+            case EEL_ROAR, CORNELIA_VORTEX -> new dev.aquamiraenouveau.CreatureAuraGlyph(ability);
+            case EEL_BITE -> new dev.aquamiraenouveau.EelBiteGlyph();
             default -> new dev.aquamiraenouveau.AquamiraeGlyph(ability);
         };
     }

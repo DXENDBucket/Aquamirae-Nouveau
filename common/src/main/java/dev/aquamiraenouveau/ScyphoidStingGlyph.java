@@ -50,4 +50,9 @@ public final class ScyphoidStingGlyph extends AbstractEffect implements TriggerP
     @Override public SpellTier defaultTier() { return SpellTier.ONE; }
     @Override protected Set<AbstractAugment> getCompatibleAugments() { return Set.of(AugmentAmplify.INSTANCE, AugmentExtendTime.INSTANCE); }
     @Override public String getBookDescription() { return Component.translatable("aquamirae_nouveau.glyph_desc.glyph_scyphoid_sting").getString(); }
+    // Ars 5 calls this hook; Ars 4 has no equivalent method.
+    public void addAugmentDescriptions(java.util.Map<AbstractAugment, String> descriptions) {
+        for (var augment : getCompatibleAugments()) descriptions.put(augment, Component.translatable(
+                "ars_nouveau.augment_desc.glyph_scyphoid_sting_" + augment.getRegistryName().getPath()).getString());
+    }
 }
